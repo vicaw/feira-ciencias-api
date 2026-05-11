@@ -39,6 +39,7 @@ CREATE TABLE registros_diarios (
 
 CREATE TABLE registro_diario_arquivos (
     id SERIAL PRIMARY KEY,
-    base64 TEXT NOT NULL,
+    arquivo_id VARCHAR(255) NOT NULL,       -- Chave gerada pelo storage-module (UUID)
+    nome_original VARCHAR(255) NOT NULL,    -- Nome original do arquivo (ex: "foto.png")
     registro_diario_id INTEGER NOT NULL REFERENCES registros_diarios(id) ON DELETE CASCADE
 );

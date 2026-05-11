@@ -52,19 +52,23 @@ Ao olhar para dentro de um módulo funcional (por exemplo, `users-module`), voc�
 ```text
 users-module/src/main/java/br/com/escola/feiraciencias/users/
 ├── api/                  # Camada de Interface / Adapters de Entrada
-│   ├── requests/         # Objetos de Entrada HTTP (Payloads)
-│   ├── responses/        # Objetos de Saída HTTP (Retornos)
+│   ├── dto/              # Objetos de Transferência de Dados
+│   │   ├── requests/     # Payloads de entrada (ex: LoginRequest)
+│   │   └── responses/    # Retornos de saída (ex: TokenResponse)
 │   ├── mappers/          # Conversores Automáticos (MapStruct: DTO <-> Domínio)
 │   └── resources/        # Endpoints HTTP (Controllers JAX-RS)
 │
 ├── application/          # Camada de Aplicação
-│   └── usecases/         # Casos de Uso (Lógica de orquestração do negócio)
+│   ├── usecases/         # Casos de Uso (Fluxos de negócio únicos, ex: CadastrarAluno)
+│   └── services/         # Serviços de Aplicação (Orquestração repetitiva/ajudantes)
 │
 ├── domain/               # Camada de Domínio (O coração do sistema)
-│   ├── model/            # Entidades de Domínio puras (POJOs com regras de negócio)
+│   ├── model/            # Entidades de Domínio Ricas (Regras de negócio e estado)
+│   ├── services/         # Interfaces de Serviços de Domínio (ex: PasswordService)
 │   └── repositories/     # Interfaces de Repositório (Contratos de persistência)
 │
 └── infrastructure/       # Camada de Infraestrutura / Adapters de Saída
+    ├── security/         # Implementações de Segurança (ex: BCrypt)
     ├── client/           # Integrações com APIs externas (Clients/Gateways)
     └── persistence/      # Implementações de Banco de Dados
         ├── entities/     # Entidades JPA (@Entity)
@@ -75,10 +79,10 @@ users-module/src/main/java/br/com/escola/feiraciencias/users/
 ### Detalhamento das Camadas (Regra de Dependência)
 *A regra fundamental é que as dependências sempre apontam para o centro (Domínio).*
 
-1. **`domain` (Domínio)**: É o coração. Não possui nenhuma anotação de banco de dados ou framework web (sem JPA, sem Jackson). Apenas Java puro e anotações simples como Lombok. Define **o que** são os objetos e as interfaces do que o sistema precisa (ex: `UsuarioRepository`).
-2. **`application` (Aplicação / UseCases)**: Orquestra o fluxo de dados. Recebe chamadas da API, busca dados no domínio via repositórios (interfaces), aplica a lógica de negócio e salva as mudanças. Depende apenas do Domínio.
-3. **`api` (Interface)**: É como o mundo externo fala com o nosso módulo. Recebe requisições REST, traduz os DTOs usando os `Mappers` e chama a camada de Aplicação. Depende da Aplicação e do Domínio.
-4. **`infrastructure` (Infraestrutura)**: É **como** as coisas funcionam tecnicamente. Implementa a interface do repositório do Domínio usando Hibernate/Panache. Traduz os modelos de Domínio para Entidades JPA usando os `Mappers`. Depende da Aplicação e do Domínio.
+1. **`domain` (Domínio)**: É o coração. Contém a lógica de negócio mais pura. Define **o que** o sistema faz e os contratos (interfaces) que ele precisa que o mundo externo cumpra.
+2. **`application` (Aplicação)**: Orquestra os fluxos de dados. Usa os modelos e repositórios do domínio para realizar tarefas específicas. Os **Use Cases** são as ações do sistema, e os **Services** aqui ajudam a evitar repetição de código de orquestração.
+3. **`api` (Interface)**: É como o mundo externo (Web, Mobile) fala com o sistema. Traduz requisições para chamadas da Aplicação e Domínio.
+4. **`infrastructure` (Infraestrutura)**: Contém as implementações técnicas das interfaces do Domínio. Aqui vive o código que fala com o Banco de Dados, APIs de Terceiros ou sistemas de Hashing.
 
 ---
 

@@ -9,20 +9,29 @@ import br.com.escola.feiraciencias.users.infrastructure.persistence.entities.Usu
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingConstants;
 
+import org.mapstruct.BeanMapping;
+import org.mapstruct.Mapper;
+import org.mapstruct.MappingConstants;
+import org.mapstruct.SubclassExhaustiveStrategy;
+import org.mapstruct.SubclassMapping;
+
 @Mapper(componentModel = MappingConstants.ComponentModel.CDI)
 public interface UsuarioPersistenceMapper {
-    Aluno toDomain(AlunoJpaEntity entity);
-    Professor toDomain(ProfessorJpaEntity entity);
 
-    AlunoJpaEntity toEntity(Aluno domain);
-    ProfessorJpaEntity toEntity(Professor domain);
+    @SubclassMapping(source = AlunoJpaEntity.class, target = Aluno.class)
+    @SubclassMapping(source = ProfessorJpaEntity.class, target = Professor.class)
+    @BeanMapping(subclassExhaustiveStrategy = SubclassExhaustiveStrategy.RUNTIME_EXCEPTION)
+    Usuario toDomain(UsuarioJpaEntity entity);
 
-    default Usuario toDomainBase(UsuarioJpaEntity entity) {
-        if (entity instanceof AlunoJpaEntity alunoEntity) {
-            return toDomain(alunoEntity);
-        } else if (entity instanceof ProfessorJpaEntity profEntity) {
-            return toDomain(profEntity);
-        }
-        throw new IllegalArgumentException("Unknown entity type: " + entity.getClass().getName());
-    }
+    @SubclassMapping(source = Aluno.class, target = AlunoJpaEntity.class)
+    @SubclassMapping(source = Professor.class, target = ProfessorJpaEntity.class)
+    @BeanMapping(subclassExhaustiveStrategy = SubclassExhaustiveStrategy.RUNTIME_EXCEPTION)
+    UsuarioJpaEntity toEntity(Usuario domain);
+
+    // Métodos de suporte para as subclasses (evitam ambiguidade por terem nomes diferentes)
+    Aluno toAlunoDomain(AlunoJpaEntity entity);
+    Professor toProfessorDomain(ProfessorJpaEntity entity);
+    
+    AlunoJpaEntity toAlunoEntity(Aluno domain);
+    ProfessorJpaEntity toProfessorEntity(Professor domain);
 }

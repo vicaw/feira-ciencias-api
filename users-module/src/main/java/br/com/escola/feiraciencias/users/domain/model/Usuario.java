@@ -1,15 +1,16 @@
 package br.com.escola.feiraciencias.users.domain.model;
 
 import br.com.escola.feiraciencias.shared.domain.enums.TipoUsuario;
+import br.com.escola.feiraciencias.shared.domain.validation.DomainValidator;
 import java.time.LocalDateTime;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
+// @Setter REMOVIDO: O domínio não expõe mutação arbitrária de estado.
+// Use os métodos de negócio abaixo para alterar o estado de forma controlada.
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public abstract class Usuario {
@@ -20,4 +21,37 @@ public abstract class Usuario {
     private TipoUsuario tipoUsuario;
     private LocalDateTime dataCadastro;
     private Integer criadoPorId;
+
+    /**
+     * Registra o usuário no sistema, definindo a senha hasheada e a data de cadastro.
+     * Deve ser chamado apenas uma vez, no momento do cadastro.
+     */
+    public void registrar(String senhaHasheada) {
+        DomainValidator.notBlank(this.nome, "O nome do usuário é obrigatório.");
+        DomainValidator.validEmail(this.email, "O email informado é inválido.");
+        DomainValidator.notBlank(senhaHasheada, "A senha não pode ser vazia.");
+
+        this.senha = senhaHasheada;
+        this.dataCadastro = LocalDateTime.now();
+    }
+
+    /**
+     * Vincula este usuário (Aluno) ao professor que o cadastrou.
+     */
+    public void vincularAoProfessor(Integer professorId) {
+        this.criadoPorId = professorId;
+    }
+
+    // Setter de tipoUsuario mantido como protected para uso apenas por subclasses
+    protected void setTipoUsuario(TipoUsuario tipoUsuario) {
+        this.tipoUsuario = tipoUsuario;
+    }
+
+     public boolean isProfessor() {
+        return TipoUsuario.PROFESSOR.equals(tipoUsuario);
+    }
+ 
+    public boolean isAluno() {
+        return TipoUsuario.ALUNO.equals(tipoUsuario);
+    }
 }

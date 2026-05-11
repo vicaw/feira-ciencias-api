@@ -21,26 +21,18 @@ public class UsuarioPanacheRepository implements UsuarioRepository, PanacheRepos
 
     @Override
     public Usuario salvar(Usuario usuario) {
-        // Implementação básica usando o mapper
-        if (usuario instanceof Aluno aluno) {
-            AlunoJpaEntity entity = persistenceMapper.toEntity(aluno);
-            persist(entity);
-            return persistenceMapper.toDomain(entity);
-        } else if (usuario instanceof Professor prof) {
-            ProfessorJpaEntity entity = persistenceMapper.toEntity(prof);
-            persist(entity);
-            return persistenceMapper.toDomain(entity);
-        }
-        throw new IllegalArgumentException("Unknown domain type");
+        UsuarioJpaEntity entity = persistenceMapper.toEntity(usuario);
+        persist(entity);
+        return persistenceMapper.toDomain(entity);
     }
 
     @Override
     public Optional<Usuario> buscarPorId(Integer id) {
-        return findByIdOptional(id).map(persistenceMapper::toDomainBase);
+        return findByIdOptional(id).map(persistenceMapper::toDomain);
     }
 
     @Override
     public Optional<Usuario> buscarPorEmail(String email) {
-        return find("email", email).firstResultOptional().map(persistenceMapper::toDomainBase);
+        return find("email", email).firstResultOptional().map(persistenceMapper::toDomain);
     }
 }

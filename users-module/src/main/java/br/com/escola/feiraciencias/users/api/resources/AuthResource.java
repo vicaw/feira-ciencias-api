@@ -1,9 +1,8 @@
-package br.com.escola.feiraciencias.users.api.resources;
-
-import br.com.escola.feiraciencias.users.api.requests.LoginRequest;
-import br.com.escola.feiraciencias.users.api.responses.TokenResponse;
+import br.com.escola.feiraciencias.users.api.dto.requests.LoginRequest;
+import br.com.escola.feiraciencias.users.api.dto.responses.LoginResponse;
 import br.com.escola.feiraciencias.users.application.usecases.AuthUseCase;
 import jakarta.inject.Inject;
+import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
@@ -21,8 +20,8 @@ public class AuthResource {
 
     @POST
     @Path("/login")
-    public Response login(LoginRequest loginRequest) {
-        String token = authUseCase.autenticar(loginRequest.getEmail(), loginRequest.getSenha());
-        return Response.ok(new TokenResponse(token)).build();
+    public Response login(@Valid LoginRequest loginRequest) {
+        String token = authUseCase.execute(loginRequest.email(), loginRequest.senha());
+        return Response.ok(new LoginResponse(token)).build();
     }
 }
