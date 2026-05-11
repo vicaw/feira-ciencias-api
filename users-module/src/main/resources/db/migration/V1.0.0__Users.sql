@@ -1,0 +1,22 @@
+-- MÓDULO: USERS - V1.0.0
+CREATE TABLE usuarios (
+    id SERIAL PRIMARY KEY,
+    nome VARCHAR(150) NOT NULL,
+    email VARCHAR(150) NOT NULL UNIQUE,
+    senha VARCHAR(255) NOT NULL,
+    tipo_usuario VARCHAR(50) NOT NULL,
+    data_cadastro TIMESTAMP NOT NULL,
+    criado_por_id INTEGER REFERENCES usuarios(id)
+);
+
+CREATE TABLE alunos (
+    id INTEGER PRIMARY KEY REFERENCES usuarios(id) ON DELETE CASCADE,
+    matricula VARCHAR(50) NOT NULL UNIQUE,
+    ano_escolar VARCHAR(30) NOT NULL
+);
+
+CREATE TABLE professores (
+    id INTEGER PRIMARY KEY REFERENCES usuarios(id) ON DELETE CASCADE,
+    is_adm BOOLEAN NOT NULL DEFAULT FALSE,
+    materia VARCHAR(120) NOT NULL
+);
