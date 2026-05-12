@@ -122,6 +122,11 @@ users-module/src/main/java/br/com/escola/feiraciencias/users/
 O sistema estará disponível em: `http://localhost:8080`
 O Swagger UI estará disponível em: `http://localhost:8080/q/swagger-ui`
 
+### 🔑 Usuário de Teste (Modo Dev)
+Ao iniciar em modo dev, um professor padrão é criado automaticamente para testes:
+* **Email:** `professor@escola.com`
+* **Senha:** `123456`
+
 ### Gerando o Executável (Produção)
 Para gerar o JAR otimizado:
 
