@@ -16,8 +16,11 @@ public class RegistroDiarioArquivoJpaEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(columnDefinition = "TEXT", nullable = false)
-    private String base64;
+    @Column(name = "arquivo_id", nullable = false)
+    private String arquivoId; // UUID retornado pelo storage-module
+
+    @Column(name = "nome_original", nullable = false)
+    private String nomeOriginal; // Cópia do nome para exibição rápida
 
     @Column(name = "registro_diario_id", nullable = false)
     private Integer registroDiarioId;

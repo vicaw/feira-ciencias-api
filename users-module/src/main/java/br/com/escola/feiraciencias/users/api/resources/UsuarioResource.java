@@ -39,12 +39,9 @@ public class UsuarioResource {
 
     @POST
     @Path("/alunos")
+    @jakarta.annotation.security.RolesAllowed("PROFESSOR")
     public Response cadastrarAluno(@Valid CadastrarAlunoRequest request) {
-        String sub = jwt.getSubject();
-        if (sub == null) {
-            throw new BusinessRuleException("Token JWT ausente ou inválido.");
-        }
-        Integer professorId = Integer.parseInt(sub);
+        Integer professorId = Integer.parseInt(jwt.getSubject());
 
         Aluno aluno = apiMapper.toDomain(request);
 

@@ -10,7 +10,7 @@ import org.mapstruct.MappingConstants;
 public interface UsuarioApiMapper {
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "tipoUsuario", ignore = true)
+    @Mapping(target = "tipoUsuario", expression = "java(br.com.escola.feiraciencias.shared.domain.enums.TipoUsuario.ALUNO)")
     @Mapping(target = "dataCadastro", ignore = true)
     @Mapping(target = "criadoPorId", ignore = true)
     Aluno toDomain(CadastrarAlunoRequest dto);

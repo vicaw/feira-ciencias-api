@@ -7,12 +7,14 @@ import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 // @Setter REMOVIDO: O domínio não expõe mutação arbitrária de estado.
 // Use os métodos de negócio abaixo para alterar o estado de forma controlada.
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@SuperBuilder
 public abstract class Usuario {
     private Integer id;
     private String nome;

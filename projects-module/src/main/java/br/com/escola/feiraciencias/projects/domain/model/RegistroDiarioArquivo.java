@@ -11,8 +11,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class RegistroDiarioArquivo {
     private Integer id;
-    private String base64;
+    private String arquivoId;       // UUID gerado pelo storage-module
+    private String nomeOriginal;    // Cópia do nome para exibição sem consultar o storage
     private Integer registroDiarioId;
-
-    // Getters and Setters omitted
 }

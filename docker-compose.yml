@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   db:
-    image: postgres:15-alpine
+    image: postgres:15.4-alpine
     container_name: feira_ciencias_db
     environment:
       POSTGRES_USER: feira_user

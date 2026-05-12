@@ -23,6 +23,16 @@
             <artifactId>quarkus-arc</artifactId>
         </dependency>
 
+        <!-- REST + JSON -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-rest-jackson</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-smallrye-openapi</artifactId>
+        </dependency>
+
         <!-- Persistência JPA (Opcional, se formos salvar metadados do arquivo no banco) -->
         <dependency>
             <groupId>io.quarkus</groupId>

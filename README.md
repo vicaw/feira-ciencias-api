@@ -95,7 +95,6 @@ users-module/src/main/java/br/com/escola/feiraciencias/users/
 * **MapStruct**: Geração automática de código para Mapeamento de objetos (DTO -> Model -> JPA).
 * **Lombok**: Redução de código boilerplate (Getters, Setters, Construtores).
 * **SmallRye JWT**: Autenticação e Autorização via tokens JWT.
-* **Testcontainers (Dev Services)**: Subida automática de instâncias do PostgreSQL via Docker durante o desenvolvimento local sem necessidade de configuração.
 
 ---
 
@@ -104,17 +103,24 @@ users-module/src/main/java/br/com/escola/feiraciencias/users/
 ### Pré-requisitos
 * **Java 21** ou superior.
 * **Maven 3.9+**.
-* **Docker** (O Quarkus utiliza o *Dev Services* para subir o banco de dados automaticamente).
+* **Docker e Docker Compose**.
 
 ### Modo de Desenvolvimento (Hot Reload)
-Para rodar o projeto com recarga automática de código e banco de dados automático:
 
-```bash
-mvn quarkus:dev -pl bootstrap -am
-```
+1. **Subir o Banco de Dados**:
+   Na raiz do projeto, execute:
+   ```bash
+   docker-compose up -d
+   ```
+
+2. **Rodar a Aplicação**:
+   Para rodar o projeto com recarga automática de código:
+   ```bash
+   mvn quarkus:dev -pl bootstrap -am
+   ```
 
 O sistema estará disponível em: `http://localhost:8080`
-O Swagger UI estará disponível em: `http://localhost:8080/q/dev-ui` (ou `/q/swagger-ui` se habilitado).
+O Swagger UI estará disponível em: `http://localhost:8080/q/swagger-ui`
 
 ### Gerando o Executável (Produção)
 Para gerar o JAR otimizado:
