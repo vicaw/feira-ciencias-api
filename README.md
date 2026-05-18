@@ -105,31 +105,131 @@ users-module/src/main/java/br/com/escola/feiraciencias/users/
 * **Maven 3.9+**.
 * **Docker e Docker Compose**.
 
+### 📋 Status Atual do Sistema
+
+O sistema está em desenvolvimento com os seguintes módulos funcionais implementados:
+
+* **`users-module`**: ✅ Gestão de Usuários (Alunos e Professores), autenticação JWT e perfis.
+* **`events-module`**: ✅ Gestão de Eventos/Feiras de Ciências (Datas, Status).
+* **`projects-module`**: ✅ Gestão de Projetos dos Alunos (Inscrições, Diários, Materiais).
+* **`storage-module`**: ✅ Abstração para armazenamento e upload de arquivos.
+* **`shared-kernel`**: ✅ Componentes compartilhados (Exceções, Mappers, Utilidades).
+
+---
+
 ### Modo de Desenvolvimento (Hot Reload)
 
-1. **Subir o Banco de Dados**:
-   Na raiz do projeto, execute:
-   ```bash
-   docker-compose up -d
-   ```
+#### **Passo 1: Iniciar o Banco de Dados**
 
-2. **Rodar a Aplicação**:
-   Para rodar o projeto com recarga automática de código:
-   ```bash
-   mvn quarkus:dev -pl bootstrap -am
-   ```
+Na raiz do projeto, execute o comando para subir o PostgreSQL via Docker Compose:
 
-O sistema estará disponível em: `http://localhost:8080`
-O Swagger UI estará disponível em: `http://localhost:8080/q/swagger-ui`
+```bash
+docker-compose up -d
+```
+
+**Verificar se o banco está rodando:**
+```bash
+docker-compose ps
+```
+
+Você deve ver algo como:
+```
+CONTAINER ID   IMAGE       STATUS
+xxxxxxxx       postgres    Up X seconds
+```
+
+O banco estará disponível em:
+- **Host**: `localhost`
+- **Porta**: `5432`
+- **Banco de Dados**: `feira_ciencias` (ou conforme configurado no `application.properties`)
+
+#### **Passo 2: Rodar a Aplicação em Modo Dev**
+
+Após confirmar que o banco está rodando, execute o projeto com recarga automática de código:
+
+```bash
+mvn quarkus:dev -pl bootstrap -am
+```
+
+Este comando:
+- Compila todos os módulos (`-am` = also-make)
+- Ativa o hot-reload (recarga automática ao salvar arquivos)
+- Inicia o servidor Quarkus
+
+**Aguarde a mensagem:**
+```
+✅ Quarkus x.x.x started in 0.000s
+🎉 Listening on: http://localhost:8080
+```
+
+---
+
+### 🌐 Acessar a Aplicação
+
+Após rodar com sucesso, acesse:
+
+* **API REST**: `http://localhost:8080`
+* **Swagger UI**: `http://localhost:8080/q/swagger-ui`
+* **Métricas**: `http://localhost:8080/q/metrics`
+
+---
 
 ### 🔑 Usuário de Teste (Modo Dev)
-Ao iniciar em modo dev, um professor padrão é criado automaticamente para testes:
-* **Email:** `professor@escola.com`
-* **Senha:** `123456`
 
-### Gerando o Executável (Produção)
-Para gerar o JAR otimizado:
+Ao iniciar em modo dev, um professor padrão é criado automaticamente via Flyway:
+
+* **Email**: `professor@escola.com`
+* **Senha**: `123456`
+
+Use essas credenciais para fazer login e obter um token JWT.
+
+---
+
+### ⛔ Parar a Aplicação
+
+Para parar a aplicação em desenvolvimento, pressione: **`Ctrl + C`** no terminal.
+
+---
+
+### 🧹 Parar o Banco de Dados
+
+Para parar os containers Docker:
+
+```bash
+docker-compose down
+```
+
+Para parar **sem remover** os dados:
+```bash
+docker-compose stop
+```
+
+---
+
+### 📦 Gerando o Executável (Produção)
+
+Para gerar o JAR otimizado para produção:
 
 ```bash
 mvn clean package
 ```
+
+O JAR será gerado em: `bootstrap/target/`
+
+---
+
+### 🔧 Troubleshooting
+
+**Erro: Port 5432 already in use**
+```bash
+docker-compose down  # Parar os containers
+docker-compose up -d # Reiniciar
+```
+
+**Erro: Connection refused ao conectar no banco**
+- Aguarde alguns segundos após `docker-compose up -d` para o PostgreSQL iniciar
+- Verifique com `docker-compose ps`
+
+**Erro: Maven build failures**
+- Certifique-se de que Java 21+ está instalado: `java -version`
+- Limpe o cache: `mvn clean`

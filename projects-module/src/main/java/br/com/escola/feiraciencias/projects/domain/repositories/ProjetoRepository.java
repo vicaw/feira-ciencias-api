@@ -8,4 +8,5 @@ public interface ProjetoRepository {
     Projeto salvar(Projeto projeto);
     Optional<Projeto> buscarPorId(Integer id);
     List<Projeto> listarPorEvento(Integer eventoId);
+    void excluir(Integer id);
 }

@@ -1,3 +1,5 @@
+package br.com.escola.feiraciencias.users.api.resources;
+
 import br.com.escola.feiraciencias.users.api.dto.requests.LoginRequest;
 import br.com.escola.feiraciencias.users.api.dto.responses.LoginResponse;
 import br.com.escola.feiraciencias.users.application.usecases.AuthUseCase;
