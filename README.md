@@ -158,6 +158,8 @@ Requer role: `ADMIN` ou `PROFESSOR`.
 | `tipo` | `ADMIN \| PROFESSOR \| ALUNO` | Filtra por tipo |
 | `page` | integer | Página (default: 0) |
 | `size` | integer | Tamanho (default: 20) |
+| `totalSize` | integer | Número de Páginas |
+| `hasMore` | bool | Indica se existem mais páginas disponíveis |
  
 ---
  
