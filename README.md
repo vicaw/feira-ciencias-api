@@ -117,6 +117,204 @@ O sistema está em desenvolvimento com os seguintes módulos funcionais implemen
 
 ---
 
+## Feira de Ciências API — Rotas
+ 
+### Autenticação
+ 
+Todas as rotas protegidas exigem o header:
+```
+Authorization: Bearer <token>
+```
+ 
+---
+ 
+### Usuários `/usuarios`
+ 
+#### Registrar usuário (aceitar convite)
+```
+POST /usuarios
+```
+Público. O usuário preenche email e senha usando o token recebido por convite.
+ 
+**Body:**
+```json
+{
+  "token": "uuid-do-convite",
+  "email": "usuario@email.com",
+  "senha": "minimo6caracteres"
+}
+```
+ 
+---
+ 
+#### Listar usuários
+```
+GET /usuarios?tipo=ALUNO&page=0&size=20
+```
+Requer role: `ADMIN` ou `PROFESSOR`.
+ 
+| Query param | Tipo | Descrição |
+|---|---|---|
+| `tipo` | `ADMIN \| PROFESSOR \| ALUNO` | Filtra por tipo |
+| `page` | integer | Página (default: 0) |
+| `size` | integer | Tamanho (default: 20) |
+ 
+---
+ 
+#### Atualizar dados cadastrais
+```
+PATCH /usuarios/{id}
+```
+Requer role: `ADMIN`, `PROFESSOR` ou `ALUNO`.
+ 
+**Body** (todos opcionais):
+```json
+{
+  "nome": "Novo Nome",
+  "email": "novo@email.com",
+  "matricula": "2024001",
+  "anoEscolar": "3º Ano",
+  "materia": "Matemática"
+}
+```
+ 
+---
+ 
+#### Excluir usuário
+```
+DELETE /usuarios/{id}
+```
+Requer role: `ADMIN` ou `PROFESSOR`.
+ 
+Regras:
+- `ADMIN` pode excluir qualquer usuário exceto outros admins
+- `PROFESSOR` só pode excluir alunos vinculados a ele
+---
+ 
+#### Alterar senha (próprio usuário)
+```
+PATCH /usuarios/{id}/senha
+```
+Requer role: `ADMIN`, `PROFESSOR` ou `ALUNO`.
+ 
+**Body:**
+```json
+{
+  "senhaAtual": "senha123",
+  "novaSenha": "novasenha123"
+}
+```
+ 
+---
+ 
+#### Resetar senha (admin, professores com seus alunos)
+```
+POST /usuarios/{id}/senha/reset
+```
+Requer role: `ADMIN, PROFESSOR`.
+ 
+Gera uma senha temporária e a retorna no response. O usuário deverá alterá-la no próximo acesso.
+ 
+---
+ 
+### Convites `/convites`
+ 
+#### Listar convites
+```
+GET /convites?status=PENDENTE&page=0&size=20
+```
+Requer role: `ADMIN` ou `PROFESSOR`.
+ 
+| Query param | Tipo | Descrição |
+|---|---|---|
+| `status` | `PENDENTE \| USADO \| EXPIRADO \| CANCELADO` | Filtra por status |
+| `page` | integer | Página (default: 0) |
+| `size` | integer | Tamanho (default: 20) |
+| `totalSize` | integer | Número de Páginas |
+| `hasMore` | bool | Indica se existem mais páginas disponíveis |
+ 
+---
+ 
+#### Gerar convite para aluno
+```
+POST /convites/alunos
+```
+Requer role: `PROFESSOR`.
+ 
+**Body:**
+```json
+{
+  "nome": "Nome do Aluno",
+  "matricula": "2024001",
+  "anoEscolar": "3º Ano"
+}
+```
+ 
+**Response:**
+```json
+{
+  "token": "uuid-do-convite"
+}
+```
+ 
+> No momento o token é retornado no response. TODO: Mudar para envio por email (?).
+ 
+---
+ 
+### Gerar convite para professor
+```
+POST /convites/professores
+```
+Requer role: `ADMIN`.
+ 
+**Body:**
+```json
+{
+  "nome": "Nome do Professor",
+  "disciplina": "Matemática"
+}
+```
+ 
+**Response:**
+```json
+{
+  "token": "uuid-do-convite"
+}
+```
+ 
+---
+ 
+### Cancelar convite
+```
+DELETE /convites/{id}
+```
+Requer role: `ADMIN` ou `PROFESSOR`.
+ 
+- `PROFESSOR` só pode cancelar convites que ele mesmo gerou
+- `ADMIN` pode cancelar qualquer convite
+---
+ 
+### Status dos convites
+ 
+| Status | Descrição |
+|---|---|
+| `PENDENTE` | Aguardando aceite |
+| `USADO` | Aceito pelo usuário |
+| `EXPIRADO` | Prazo de 7 dias encerrado |
+| `CANCELADO` | Cancelado manualmente |
+ 
+---
+ 
+### Fluxo de cadastro
+ 
+```
+1. PROFESSOR/ADMIN gera convite  →  POST /convites/alunos ou /convites/professores
+2. Sistema envia token  →  usuário recebe link de ativação
+3. Usuário aceita o convite       →  POST /usuarios com token + email + senha
+```
+
+---
+
 ### Modo de Desenvolvimento (Hot Reload)
 
 #### **Passo 1: Iniciar o Banco de Dados**
