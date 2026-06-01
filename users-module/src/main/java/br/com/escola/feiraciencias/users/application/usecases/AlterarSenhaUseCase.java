@@ -2,8 +2,6 @@ package br.com.escola.feiraciencias.users.application.usecases;
 
 import br.com.escola.feiraciencias.shared.domain.exceptions.BusinessRuleException;
 import br.com.escola.feiraciencias.users.application.services.UsuarioService;
-import br.com.escola.feiraciencias.users.domain.model.Aluno;
-import br.com.escola.feiraciencias.users.domain.model.Professor;
 import br.com.escola.feiraciencias.users.domain.model.Usuario;
 import br.com.escola.feiraciencias.users.domain.repositories.UsuarioRepository;
 import br.com.escola.feiraciencias.users.domain.services.PasswordService;
@@ -12,7 +10,7 @@ import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 
 @ApplicationScoped
-public class CadastrarAlunoUseCase {
+public class AlterarSenhaUseCase {
 
     @Inject
     UsuarioService usuarioService;
@@ -24,19 +22,14 @@ public class CadastrarAlunoUseCase {
     PasswordService passwordService;
 
     @Transactional
-    public Aluno execute(Aluno aluno, Integer professorId) {
-        Usuario orientador = usuarioService.buscarPorIdOuFalhar(professorId);
+    public void execute(Integer usuarioId, String senhaAtual, String novaSenha) {
+        Usuario usuario = usuarioService.buscarPorIdOuFalhar(usuarioId);
 
-        if (!orientador.isProfessor()) {
-            throw new BusinessRuleException("Apenas professores podem cadastrar alunos.");
+        if (senhaAtual == null || !passwordService.verify(senhaAtual, usuario.getSenha())) {
+            throw new BusinessRuleException("Senha atual incorreta.");
         }
 
-        usuarioService.verificarEmailDisponivel(aluno.getEmail());
-
-        aluno.definirDadosEscolares(aluno.getMatricula(), aluno.getAnoEscolar());
-        aluno.registrar(passwordService.hash(aluno.getSenha()));
-        aluno.vincularAoProfessor(professorId);
-
-        return (Aluno) usuarioRepository.salvar(aluno);
+        usuario.resetarSenha(passwordService.hash(novaSenha));
+        usuarioRepository.salvar(usuario);
     }
 }

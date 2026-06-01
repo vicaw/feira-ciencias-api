@@ -34,4 +34,18 @@ public class Aluno extends Usuario {
         this.matricula = matricula;
         this.anoEscolar = anoEscolar;
     }
+
+    /**
+     * Atualiza dados escolares parcialmente. Campos null são ignorados.
+     */
+    public void atualizarDadosEscolares(String matricula, String anoEscolar) {
+        if (matricula != null) {
+            DomainValidator.notBlank(matricula, "A matrícula não pode ser vazia.");
+            this.matricula = matricula;
+        }
+        if (anoEscolar != null) {
+            DomainValidator.notBlank(anoEscolar, "O ano escolar não pode ser vazio.");
+            this.anoEscolar = anoEscolar;
+        }
+    }
 }
