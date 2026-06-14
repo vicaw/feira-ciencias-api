@@ -11,6 +11,8 @@ import java.util.Optional;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import br.com.escola.feiraciencias.shared.domain.pagination.Page;
+
 @ApplicationScoped
 public class EventoPanacheRepository implements EventoRepository, PanacheRepositoryBase<EventoJpaEntity, Integer> {
 
@@ -32,6 +34,15 @@ public class EventoPanacheRepository implements EventoRepository, PanacheReposit
     @Override
     public List<Evento> listarTodos() {
         return listAll().stream().map(mapper::toDomain).collect(Collectors.toList());
+    }
+
+    @Override
+    public Page<Evento> listarPaginado(int page, int size) {
+        var query = findAll();
+        long total = query.count();
+        List<Evento> content = query.page(page, size).list()
+                .stream().map(mapper::toDomain).collect(Collectors.toList());
+        return new Page<>(content, total);
     }
 
     @Override

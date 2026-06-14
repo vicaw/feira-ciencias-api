@@ -41,5 +41,6 @@ public class EventoJpaEntity {
     @Column(name = "criado_por_id", nullable = false)
     private Integer criadoPorId;
 
-    // Getters and Setters omitted for brevity
+    @Column(name = "imagem_capa_chave", length = 500)
+    private String imagemCapaChave;
 }

@@ -35,13 +35,6 @@ public interface ProjetoApiMapper {
     @Mapping(target = "projetoId", ignore = true)
     Comentario toDomain(CriarComentarioRequest dto);
 
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "dataCriacao", ignore = true)
-    @Mapping(target = "criadoPorId", ignore = true)
-    @Mapping(target = "projetoId", ignore = true)
-    RegistroDiario toDomain(CriarRegistroDiarioRequest dto);
-
     ProjetoResponse toResponse(Projeto domain);
     ComentarioResponse toResponse(Comentario domain);
-    RegistroDiarioResponse toResponse(RegistroDiario domain);
 }

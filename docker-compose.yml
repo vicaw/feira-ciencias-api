@@ -18,5 +18,28 @@ services:
       timeout: 5s
       retries: 5
 
+  pgadmin:
+    image: dpage/pgadmin4:8.5
+    container_name: feira_ciencias_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@feira.com
+      PGADMIN_DEFAULT_PASSWORD: admin_pass
+    ports:
+      - "8081:80"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
+  localstack:
+    container_name: localstack_s3
+    image: localstack/localstack:latest
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=s3
+
 volumes:
   postgres_data:
+  pgadmin_data:

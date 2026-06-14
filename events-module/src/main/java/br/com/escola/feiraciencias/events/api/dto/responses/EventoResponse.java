@@ -12,5 +12,6 @@ public record EventoResponse(
     LocalDate dataFim,
     SituacaoEvento situacao,
     LocalDateTime dataCriacao,
-    Integer criadoPorId
+    Integer criadoPorId,
+    String imagemCapaUrl
 ) {}

@@ -55,7 +55,7 @@ public abstract class Usuario {
     }
 
     public boolean isProfessor() {
-        return TipoUsuario.PROFESSOR.equals(tipoUsuario);
+        return TipoUsuario.PROFESSOR.equals(tipoUsuario) || TipoUsuario.ADMIN.equals(tipoUsuario);
     }
  
     public boolean isAluno() {

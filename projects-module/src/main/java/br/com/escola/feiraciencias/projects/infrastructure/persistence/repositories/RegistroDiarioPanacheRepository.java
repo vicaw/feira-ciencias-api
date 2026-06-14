@@ -8,6 +8,7 @@ import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
@@ -19,8 +20,19 @@ public class RegistroDiarioPanacheRepository implements RegistroDiarioRepository
     @Override
     public RegistroDiario salvar(RegistroDiario registro) {
         RegistroDiarioJpaEntity entity = mapper.toEntity(registro);
-        persist(entity);
+        
+        if (entity.getId() == null) {
+            persist(entity);
+        } else {
+            entity = getEntityManager().merge(entity);
+        }
+        
         return mapper.toDomain(entity);
+    }
+
+    @Override
+    public Optional<RegistroDiario> buscarPorId(Integer id) {
+        return findByIdOptional(id).map(mapper::toDomain);
     }
 
     @Override

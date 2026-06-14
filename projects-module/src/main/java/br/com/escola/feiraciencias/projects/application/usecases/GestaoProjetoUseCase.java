@@ -1,5 +1,8 @@
 package br.com.escola.feiraciencias.projects.application.usecases;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 import br.com.escola.feiraciencias.projects.domain.model.Comentario;
 import br.com.escola.feiraciencias.projects.domain.model.Projeto;
 import br.com.escola.feiraciencias.projects.domain.model.ProjetoUsuario;
@@ -13,15 +16,12 @@ import br.com.escola.feiraciencias.shared.domain.enums.TipoIntegrante;
 import br.com.escola.feiraciencias.shared.domain.enums.TipoUsuario;
 import br.com.escola.feiraciencias.shared.domain.exceptions.BusinessRuleException;
 import br.com.escola.feiraciencias.shared.domain.exceptions.EntityNotFoundException;
+import br.com.escola.feiraciencias.storage.application.contracts.StorageService;
+import br.com.escola.feiraciencias.storage.application.dto.StorageFileInput;
 import br.com.escola.feiraciencias.users.application.services.UsuarioService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
-import jakarta.persistence.criteria.CriteriaBuilder.In;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @ApplicationScoped
 public class GestaoProjetoUseCase {
@@ -41,12 +41,15 @@ public class GestaoProjetoUseCase {
     @Inject
     UsuarioService usuarioService;
 
+    @Inject
+    StorageService storageService;
+
     // ==================== PROJETOS ====================
 
     @Transactional
     public Projeto criarProjeto(Projeto projeto, Integer professorId) {
         var usuario = usuarioService.buscarUsuarioPorId(professorId);
-        if (!usuario.getTipoUsuario().equals(TipoUsuario.PROFESSOR)) {
+        if (!usuario.isProfessor()) {
             throw new BusinessRuleException("Apenas professores podem criar projetos.");
         }
 
@@ -167,7 +170,7 @@ public class GestaoProjetoUseCase {
     // ==================== REGISTROS DIÁRIOS ====================
 
     @Transactional
-    public RegistroDiario criarRegistroDiario(Integer projetoId, RegistroDiario registro, Integer alunoId) {
+    public RegistroDiario criarRegistroDiario(Integer projetoId, RegistroDiario registro, Integer alunoId, List<StorageFileInput> arquivosInput) {
         Projeto projeto = buscarProjetoPorId(projetoId);
         var usuario = usuarioService.buscarUsuarioPorId(alunoId);
 
@@ -179,11 +182,57 @@ public class GestaoProjetoUseCase {
         registro.setCriadoPorId(alunoId);
         registro.setDataCriacao(LocalDateTime.now());
 
+        if (arquivosInput != null && !arquivosInput.isEmpty()) {
+            if (arquivosInput.size() > RegistroDiario.LIMITE_ARQUIVOS) {
+                throw new BusinessRuleException("Limite de " + RegistroDiario.LIMITE_ARQUIVOS + " arquivos por registro excedido.");
+            }
+            for (var input : arquivosInput) {
+                var resultado = storageService.upload(input, alunoId);
+                registro.adicionarArquivoChave(resultado.chave());
+            }
+        }
+
         return registroDiarioRepository.salvar(registro);
     }
 
     public List<RegistroDiario> listarRegistrosDiarios(Integer projetoId) {
         buscarProjetoPorId(projetoId);
         return registroDiarioRepository.listarPorProjeto(projetoId);
+    }
+
+    @Transactional
+    public RegistroDiario adicionarArquivoRegistro(Integer registroId, StorageFileInput arquivoInput, Integer alunoId) {
+        var registro = registroDiarioRepository.buscarPorId(registroId)
+                .orElseThrow(() -> new EntityNotFoundException("Registro diário não encontrado."));
+
+        if (!registro.getCriadoPorId().equals(alunoId)) {
+            throw new BusinessRuleException("Apenas o autor do registro pode adicionar arquivos.");
+        }
+
+        if (registro.getArquivoChaves().size() >= RegistroDiario.LIMITE_ARQUIVOS) {
+            throw new BusinessRuleException("Limite de " + RegistroDiario.LIMITE_ARQUIVOS + " arquivos por registro atingido.");
+        }
+
+        var resultado = storageService.upload(arquivoInput, alunoId);
+        registro.adicionarArquivoChave(resultado.chave());
+
+        return registroDiarioRepository.salvar(registro);
+    }
+
+    @Transactional
+    public RegistroDiario removerArquivoRegistro(Integer registroId, String chave, Integer alunoId) {
+        var registro = registroDiarioRepository.buscarPorId(registroId)
+                .orElseThrow(() -> new EntityNotFoundException("Registro diário não encontrado."));
+
+        if (!registro.getCriadoPorId().equals(alunoId)) {
+            throw new BusinessRuleException("Apenas o autor do registro pode remover arquivos.");
+        }
+
+        if (registro.removerArquivoChave(chave)) {
+            storageService.delete(chave);
+            return registroDiarioRepository.salvar(registro);
+        }
+
+        throw new BusinessRuleException("Arquivo não encontrado neste registro.");
     }
 }

@@ -22,4 +22,11 @@ public class Evento {
     private SituacaoEvento situacao;
     private LocalDateTime dataCriacao;
     private Integer criadoPorId;
+
+    /**
+     * Chave do arquivo de capa no storage.
+     * Opcional — o evento pode não ter capa.
+     * Nunca armazena URL, apenas a chave (key).
+     */
+    private String imagemCapaChave;
 }

@@ -1,27 +1,46 @@
 package br.com.escola.feiraciencias.projects.api.resources;
 
-import br.com.escola.feiraciencias.projects.api.dto.requests.CriarProjetoRequest;
-import br.com.escola.feiraciencias.projects.api.dto.requests.AtualizarProjetoRequest;
-import br.com.escola.feiraciencias.projects.api.dto.requests.AtualizarProjetoMateriaisDescricaoRequest;
-import br.com.escola.feiraciencias.projects.api.dto.requests.CriarComentarioRequest;
-import br.com.escola.feiraciencias.projects.api.dto.requests.CriarRegistroDiarioRequest;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.eclipse.microprofile.jwt.JsonWebToken;
+import org.jboss.resteasy.reactive.RestForm;
+import org.jboss.resteasy.reactive.multipart.FileUpload;
+
 import br.com.escola.feiraciencias.projects.api.dto.requests.AdicionarIntegranteRequest;
-import br.com.escola.feiraciencias.projects.api.dto.responses.ProjetoResponse;
+import br.com.escola.feiraciencias.projects.api.dto.requests.AtualizarProjetoMateriaisDescricaoRequest;
+import br.com.escola.feiraciencias.projects.api.dto.requests.AtualizarProjetoRequest;
+import br.com.escola.feiraciencias.projects.api.dto.requests.CriarComentarioRequest;
+import br.com.escola.feiraciencias.projects.api.dto.requests.CriarProjetoRequest;
+import br.com.escola.feiraciencias.projects.api.dto.requests.CriarRegistroDiarioRequest;
 import br.com.escola.feiraciencias.projects.api.dto.responses.ComentarioResponse;
-import br.com.escola.feiraciencias.projects.api.dto.responses.RegistroDiarioResponse;
 import br.com.escola.feiraciencias.projects.api.dto.responses.IntegranteResponse;
+import br.com.escola.feiraciencias.projects.api.dto.responses.ProjetoResponse;
+import br.com.escola.feiraciencias.projects.api.dto.responses.RegistroDiarioArquivoResponse;
+import br.com.escola.feiraciencias.projects.api.dto.responses.RegistroDiarioResponse;
 import br.com.escola.feiraciencias.projects.api.mappers.ProjetoApiMapper;
 import br.com.escola.feiraciencias.projects.application.usecases.GestaoProjetoUseCase;
+import br.com.escola.feiraciencias.projects.domain.model.RegistroDiario;
 import br.com.escola.feiraciencias.shared.domain.exceptions.BusinessRuleException;
+import br.com.escola.feiraciencias.storage.application.contracts.StorageService;
+import br.com.escola.feiraciencias.storage.application.dto.StorageFileInput;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
-import jakarta.ws.rs.*;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.PATCH;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import org.eclipse.microprofile.jwt.JsonWebToken;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Path("/projetos")
 @Produces(MediaType.APPLICATION_JSON)
@@ -35,12 +54,15 @@ public class ProjetoResource {
     ProjetoApiMapper mapper;
 
     @Inject
+    StorageService storageService;
+
+    @Inject
     JsonWebToken jwt;
 
     // ==================== PROJETOS CRUD ====================
 
     @POST
-    @RolesAllowed("PROFESSOR")
+    @RolesAllowed({"ADMIN","PROFESSOR"})
     public Response criarProjeto(@Valid CriarProjetoRequest request) {
         Integer professorId = Integer.parseInt(jwt.getSubject());
         var projeto = mapper.toDomain(request);
@@ -147,12 +169,29 @@ public class ProjetoResource {
 
     @POST
     @Path("/{id}/registros-diarios")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
     @RolesAllowed("ALUNO")
-    public Response criarRegistroDiario(@PathParam("id") Integer id, @Valid CriarRegistroDiarioRequest request) {
+    public Response criarRegistroDiario(
+            @PathParam("id") Integer projetoId,
+            @Valid CriarRegistroDiarioRequest request) {
+        
         Integer alunoId = Integer.parseInt(jwt.getSubject());
-        var registro = mapper.toDomain(request);
-        var criado = gestaoProjetoUseCase.criarRegistroDiario(id, registro, alunoId);
-        return Response.status(Response.Status.CREATED).entity(mapper.toResponse(criado)).build();
+        
+        RegistroDiario registro = new RegistroDiario();
+        registro.setTexto(request.texto);
+
+        List<StorageFileInput> arquivosInput = new ArrayList<>();
+        if (request.arquivos != null) {
+            for (FileUpload fileUpload : request.arquivos) {
+                StorageFileInput input = extrairFileInput(fileUpload, "projects/" + projetoId + "/registros");
+                if (input != null) {
+                    arquivosInput.add(input);
+                }
+            }
+        }
+
+        var criado = gestaoProjetoUseCase.criarRegistroDiario(projetoId, registro, alunoId, arquivosInput);
+        return Response.status(Response.Status.CREATED).entity(toRegistroDiarioResponse(criado)).build();
     }
 
     @GET
@@ -160,8 +199,89 @@ public class ProjetoResource {
     @RolesAllowed({"PROFESSOR", "ALUNO"})
     public Response listarRegistrosDiarios(@PathParam("id") Integer id) {
         List<RegistroDiarioResponse> registros = gestaoProjetoUseCase.listarRegistrosDiarios(id).stream()
-                .map(mapper::toResponse)
+                .map(this::toRegistroDiarioResponse)
                 .collect(Collectors.toList());
         return Response.ok(registros).build();
+    }
+
+    @POST
+    @Path("/{id}/registros-diarios/{registroId}/arquivos")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @RolesAllowed("ALUNO")
+    public Response adicionarArquivoRegistro(
+            @PathParam("id") Integer projetoId,
+            @PathParam("registroId") Integer registroId,
+            @RestForm("arquivo") FileUpload arquivo) {
+        
+        Integer alunoId = Integer.parseInt(jwt.getSubject());
+
+        if (arquivo == null || arquivo.uploadedFile() == null) {
+            throw new BusinessRuleException("O arquivo é obrigatório.");
+        }
+
+        StorageFileInput input = extrairFileInput(arquivo, "projects/" + projetoId + "/registros");
+        if (input == null) {
+            throw new BusinessRuleException("Falha ao processar o arquivo.");
+        }
+
+        var atualizado = gestaoProjetoUseCase.adicionarArquivoRegistro(registroId, input, alunoId);
+        return Response.ok(toRegistroDiarioResponse(atualizado)).build();
+    }
+
+    @DELETE
+    @Path("/{id}/registros-diarios/{registroId}/arquivos/{chave}")
+    @RolesAllowed("ALUNO")
+    public Response removerArquivoRegistro(
+            @PathParam("id") Integer projetoId,
+            @PathParam("registroId") Integer registroId,
+            @PathParam("chave") String chave) {
+        
+        Integer alunoId = Integer.parseInt(jwt.getSubject());
+        var atualizado = gestaoProjetoUseCase.removerArquivoRegistro(registroId, chave, alunoId);
+        return Response.ok(toRegistroDiarioResponse(atualizado)).build();
+    }
+
+    // ==================== Helpers ====================
+
+    private RegistroDiarioResponse toRegistroDiarioResponse(RegistroDiario registro) {
+        List<RegistroDiarioArquivoResponse> arquivosResponse = registro.getArquivoChaves().stream()
+                .map(chave -> new RegistroDiarioArquivoResponse(chave, storageService.gerarUrl(chave)))
+                .collect(Collectors.toList());
+
+        return new RegistroDiarioResponse(
+                registro.getId(),
+                registro.getTexto(),
+                registro.getDataCriacao(),
+                registro.getCriadoPorId(),
+                registro.getProjetoId(),
+                arquivosResponse
+        );
+    }
+
+    private StorageFileInput extrairFileInput(FileUpload fileUpload, String prefixo) {
+        if (fileUpload == null || fileUpload.uploadedFile() == null) {
+            return null;
+        }
+
+        try {
+            byte[] conteudo = Files.readAllBytes(fileUpload.uploadedFile());
+            if (conteudo.length == 0) {
+                return null;
+            }
+
+            String mimeType = fileUpload.contentType() != null
+                    ? fileUpload.contentType()
+                    : "application/octet-stream";
+
+            return new StorageFileInput(
+                    fileUpload.fileName(),
+                    mimeType,
+                    conteudo.length,
+                    conteudo,
+                    prefixo
+            );
+        } catch (IOException e) {
+            throw new RuntimeException("Falha ao processar arquivo de upload.", e);
+        }
     }
 }
