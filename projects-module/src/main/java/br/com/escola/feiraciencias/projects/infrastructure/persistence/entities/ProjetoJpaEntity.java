@@ -49,5 +49,8 @@ public class ProjetoJpaEntity {
     @Column(name = "evento_id", nullable = false)
     private Integer eventoId;
 
+    @Column(name = "imagem_capa_chave", length = 500)
+    private String imagemCapaChave;
+
     // Getters and Setters omitted
 }

@@ -1,5 +1,9 @@
 package br.com.escola.feiraciencias.projects.infrastructure.persistence.repositories;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 import br.com.escola.feiraciencias.projects.domain.model.Comentario;
 import br.com.escola.feiraciencias.projects.domain.repositories.ComentarioRepository;
 import br.com.escola.feiraciencias.projects.infrastructure.persistence.entities.ComentarioJpaEntity;
@@ -7,8 +11,6 @@ import br.com.escola.feiraciencias.projects.infrastructure.persistence.mappers.C
 import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class ComentarioPanacheRepository implements ComentarioRepository, PanacheRepositoryBase<ComentarioJpaEntity, Integer> {
@@ -19,8 +21,17 @@ public class ComentarioPanacheRepository implements ComentarioRepository, Panach
     @Override
     public Comentario salvar(Comentario comentario) {
         ComentarioJpaEntity entity = mapper.toEntity(comentario);
-        persist(entity);
+        if (entity.getId() == null) {
+            persist(entity);
+        } else {
+            entity = getEntityManager().merge(entity);
+        }
         return mapper.toDomain(entity);
+    }
+
+    @Override
+    public Optional<Comentario> buscarPorId(Integer id) {
+        return findByIdOptional(id).map(mapper::toDomain);
     }
 
     @Override
@@ -28,5 +39,10 @@ public class ComentarioPanacheRepository implements ComentarioRepository, Panach
         return list("projetoId", projetoId).stream()
                 .map(mapper::toDomain)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public void excluir(Integer id) {
+        deleteById(id);
     }
 }

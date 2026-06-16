@@ -1,31 +1,51 @@
 package br.com.escola.feiraciencias.projects.api.resources;
 
-import java.io.IOException;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.eclipse.microprofile.jwt.JsonWebToken;
+import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.jboss.resteasy.reactive.PartType;
 import org.jboss.resteasy.reactive.RestForm;
 import org.jboss.resteasy.reactive.multipart.FileUpload;
 
 import br.com.escola.feiraciencias.projects.api.dto.requests.AdicionarIntegranteRequest;
 import br.com.escola.feiraciencias.projects.api.dto.requests.AtualizarProjetoMateriaisDescricaoRequest;
 import br.com.escola.feiraciencias.projects.api.dto.requests.AtualizarProjetoRequest;
+import br.com.escola.feiraciencias.projects.api.dto.requests.AtualizarRegistroDiarioRequest;
+import br.com.escola.feiraciencias.projects.api.dto.requests.AtualizarCapaProjetoRequest;
+import br.com.escola.feiraciencias.projects.api.dto.requests.AdicionarArquivoRegistroRequest;
 import br.com.escola.feiraciencias.projects.api.dto.requests.CriarComentarioRequest;
 import br.com.escola.feiraciencias.projects.api.dto.requests.CriarProjetoRequest;
 import br.com.escola.feiraciencias.projects.api.dto.requests.CriarRegistroDiarioRequest;
 import br.com.escola.feiraciencias.projects.api.dto.responses.ComentarioResponse;
 import br.com.escola.feiraciencias.projects.api.dto.responses.IntegranteResponse;
 import br.com.escola.feiraciencias.projects.api.dto.responses.ProjetoResponse;
-import br.com.escola.feiraciencias.projects.api.dto.responses.RegistroDiarioArquivoResponse;
 import br.com.escola.feiraciencias.projects.api.dto.responses.RegistroDiarioResponse;
 import br.com.escola.feiraciencias.projects.api.mappers.ProjetoApiMapper;
-import br.com.escola.feiraciencias.projects.application.usecases.GestaoProjetoUseCase;
+import br.com.escola.feiraciencias.projects.application.usecases.AdicionarArquivoRegistroUseCase;
+import br.com.escola.feiraciencias.projects.application.usecases.AdicionarComentarioUseCase;
+import br.com.escola.feiraciencias.projects.application.usecases.AdicionarIntegranteUseCase;
+import br.com.escola.feiraciencias.projects.application.usecases.AtualizarCapaProjetoUseCase;
+import br.com.escola.feiraciencias.projects.application.usecases.AtualizarMateriaisDescricaoUseCase;
+import br.com.escola.feiraciencias.projects.application.usecases.AtualizarProjetoUseCase;
+import br.com.escola.feiraciencias.projects.application.usecases.AtualizarRegistroDiarioUseCase;
+import br.com.escola.feiraciencias.projects.application.usecases.BuscarProjetoUseCase;
+import br.com.escola.feiraciencias.projects.application.usecases.CriarProjetoUseCase;
+import br.com.escola.feiraciencias.projects.application.usecases.CriarRegistroDiarioUseCase;
+import br.com.escola.feiraciencias.projects.application.usecases.ExcluirProjetoUseCase;
+import br.com.escola.feiraciencias.projects.application.usecases.ListarComentariosUseCase;
+import br.com.escola.feiraciencias.projects.application.usecases.ListarIntegrantesUseCase;
+import br.com.escola.feiraciencias.projects.application.usecases.ListarProjetosUseCase;
+import br.com.escola.feiraciencias.projects.application.usecases.ListarRegistrosDiariosUseCase;
+import br.com.escola.feiraciencias.projects.application.usecases.RemoverCapaProjetoUseCase;
+import br.com.escola.feiraciencias.projects.application.usecases.RemoverArquivoRegistroUseCase;
+import br.com.escola.feiraciencias.projects.application.usecases.RemoverComentarioUseCase;
+import br.com.escola.feiraciencias.projects.application.usecases.RemoverIntegranteUseCase;
 import br.com.escola.feiraciencias.projects.domain.model.RegistroDiario;
 import br.com.escola.feiraciencias.shared.domain.exceptions.BusinessRuleException;
-import br.com.escola.feiraciencias.storage.application.contracts.StorageService;
 import br.com.escola.feiraciencias.storage.application.dto.StorageFileInput;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
@@ -48,13 +68,64 @@ import jakarta.ws.rs.core.Response;
 public class ProjetoResource {
 
     @Inject
-    GestaoProjetoUseCase gestaoProjetoUseCase;
+    CriarProjetoUseCase criarProjetoUseCase;
+
+    @Inject
+    BuscarProjetoUseCase buscarProjetoUseCase;
+
+    @Inject
+    ListarProjetosUseCase listarProjetosUseCase;
+
+    @Inject
+    AtualizarProjetoUseCase atualizarProjetoUseCase;
+
+    @Inject
+    AtualizarCapaProjetoUseCase atualizarCapaProjetoUseCase;
+
+    @Inject
+    RemoverCapaProjetoUseCase removerCapaProjetoUseCase;
+
+    @Inject
+    AtualizarMateriaisDescricaoUseCase atualizarMateriaisDescricaoUseCase;
+
+    @Inject
+    ExcluirProjetoUseCase excluirProjetoUseCase;
+
+    @Inject
+    AdicionarIntegranteUseCase adicionarIntegranteUseCase;
+
+    @Inject
+    ListarIntegrantesUseCase listarIntegrantesUseCase;
+
+    @Inject
+    AdicionarComentarioUseCase adicionarComentarioUseCase;
+
+    @Inject
+    ListarComentariosUseCase listarComentariosUseCase;
+
+    @Inject
+    CriarRegistroDiarioUseCase criarRegistroDiarioUseCase;
+
+    @Inject
+    AtualizarRegistroDiarioUseCase atualizarRegistroDiarioUseCase;
+
+    @Inject
+    ListarRegistrosDiariosUseCase listarRegistrosDiariosUseCase;
+
+    @Inject
+    AdicionarArquivoRegistroUseCase adicionarArquivoRegistroUseCase;
+
+    @Inject
+    RemoverArquivoRegistroUseCase removerArquivoRegistroUseCase;
+
+    @Inject
+    RemoverComentarioUseCase removerComentarioUseCase;
+
+    @Inject
+    RemoverIntegranteUseCase removerIntegranteUseCase;
 
     @Inject
     ProjetoApiMapper mapper;
-
-    @Inject
-    StorageService storageService;
 
     @Inject
     JsonWebToken jwt;
@@ -66,21 +137,21 @@ public class ProjetoResource {
     public Response criarProjeto(@Valid CriarProjetoRequest request) {
         Integer professorId = Integer.parseInt(jwt.getSubject());
         var projeto = mapper.toDomain(request);
-        var criado = gestaoProjetoUseCase.criarProjeto(projeto, professorId);
+        var criado = criarProjetoUseCase.execute(projeto, professorId);
         return Response.status(Response.Status.CREATED).entity(mapper.toResponse(criado)).build();
     }
 
     @GET
     @Path("/{id}")
     public Response obterProjeto(@PathParam("id") Integer id) {
-        var projeto = gestaoProjetoUseCase.buscarProjetoPorId(id);
+        var projeto = buscarProjetoUseCase.execute(id);
         return Response.ok(mapper.toResponse(projeto)).build();
     }
 
     @GET
     @Path("/evento/{eventoId}")
     public Response listarProjetosPorEvento(@PathParam("eventoId") Integer eventoId) {
-        List<ProjetoResponse> projetos = gestaoProjetoUseCase.listarProjetosPorEvento(eventoId).stream()
+        List<ProjetoResponse> projetos = listarProjetosUseCase.execute(eventoId).stream()
                 .map(mapper::toResponse)
                 .collect(Collectors.toList());
         return Response.ok(projetos).build();
@@ -88,11 +159,11 @@ public class ProjetoResource {
 
     @PUT
     @Path("/{id}")
-    @RolesAllowed("PROFESSOR")
+    @RolesAllowed({"PROFESSOR","ADMIN"})
     public Response atualizarProjeto(@PathParam("id") Integer id, @Valid AtualizarProjetoRequest request) {
         Integer professorId = Integer.parseInt(jwt.getSubject());
         var projeto = mapper.toDomain(request);
-        var atualizado = gestaoProjetoUseCase.atualizarProjeto(id, projeto, professorId);
+        var atualizado = atualizarProjetoUseCase.execute(id, projeto, professorId);
         return Response.ok(mapper.toResponse(atualizado)).build();
     }
 
@@ -101,30 +172,65 @@ public class ProjetoResource {
     public Response atualizarMateriaisDescricao(@PathParam("id") Integer id, 
                                                @Valid AtualizarProjetoMateriaisDescricaoRequest request) {
         Integer usuarioId = Integer.parseInt(jwt.getSubject());
-        var atualizado = gestaoProjetoUseCase.atualizarMateriaisDescricao(id, 
-                                                                         request.descricao(), 
-                                                                         request.materiais(), 
-                                                                         usuarioId);
+        var atualizado = atualizarMateriaisDescricaoUseCase.execute(id, 
+                                                                     request.descricao(), 
+                                                                     request.materiais(), 
+                                                                     usuarioId);
         return Response.ok(mapper.toResponse(atualizado)).build();
     }
 
     @DELETE
     @Path("/{id}")
-    @RolesAllowed("PROFESSOR")
+    @RolesAllowed({"PROFESSOR","ADMIN"})
     public Response excluirProjeto(@PathParam("id") Integer id) {
         Integer professorId = Integer.parseInt(jwt.getSubject());
-        gestaoProjetoUseCase.excluirProjeto(id, professorId);
+        excluirProjetoUseCase.execute(id, professorId);
         return Response.noContent().build();
+    }
+
+    // ==================== CAPA DO PROJETO ====================
+
+    @PUT
+    @Path("/{id}/capa")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @RolesAllowed({"ADMIN","PROFESSOR","ALUNO"})
+    public Response atualizarCapa(
+            @PathParam("id") Integer id,
+            @Valid AtualizarCapaProjetoRequest request) {
+
+        Integer usuarioId = Integer.parseInt(jwt.getSubject());
+
+        FileUpload capa = request.capa;
+        if (capa == null || capa.uploadedFile() == null) {
+            throw new BusinessRuleException("O arquivo da capa é obrigatório.");
+        }
+
+        StorageFileInput capaInput = mapper.toStorageFileInput(capa, "projects/" + id + "/capa");
+        if (capaInput == null) {
+            throw new BusinessRuleException("Falha ao processar o arquivo da capa.");
+        }
+
+        var atualizado = atualizarCapaProjetoUseCase.execute(id, capaInput, usuarioId);
+        return Response.ok(mapper.toResponse(atualizado)).build();
+    }
+
+    @DELETE
+    @Path("/{id}/capa")
+    @RolesAllowed({"ADMIN","PROFESSOR","ALUNO"})
+    public Response removerCapa(@PathParam("id") Integer id) {
+        Integer usuarioId = Integer.parseInt(jwt.getSubject());
+        var atualizado = removerCapaProjetoUseCase.execute(id, usuarioId);
+        return Response.ok(mapper.toResponse(atualizado)).build();
     }
 
     // ==================== INTEGRANTES ====================
 
     @POST
     @Path("/{id}/integrantes")
-    @RolesAllowed("PROFESSOR")
+    @RolesAllowed({"PROFESSOR","ADMIN"})
     public Response adicionarIntegrante(@PathParam("id") Integer id, @Valid AdicionarIntegranteRequest request) {
         Integer professorId = Integer.parseInt(jwt.getSubject());
-        var integrante = gestaoProjetoUseCase.adicionarIntegrante(id, request.usuarioId(), request.tipoIntegrante(), professorId);
+        var integrante = adicionarIntegranteUseCase.execute(id, request.usuarioId(), request.tipoIntegrante(), professorId);
         return Response.status(Response.Status.CREATED)
                 .entity(new IntegranteResponse(integrante.getId(), 
                                               integrante.getProjetoId(), 
@@ -137,32 +243,50 @@ public class ProjetoResource {
     @GET
     @Path("/{id}/integrantes")
     public Response listarIntegrantes(@PathParam("id") Integer id) {
-        List<IntegranteResponse> integrantes = gestaoProjetoUseCase.listarIntegrantes(id).stream()
+        List<IntegranteResponse> integrantes = listarIntegrantesUseCase.execute(id).stream()
                 .map(i -> new IntegranteResponse(i.getId(), i.getProjetoId(), i.getUsuarioId(), 
                                                 i.getTipoIntegrante().name(), i.getDataVinculo()))
                 .collect(Collectors.toList());
         return Response.ok(integrantes).build();
     }
 
+    @DELETE
+    @Path("/{id}/integrantes/{integranteId}")
+    @RolesAllowed({"ADMIN", "PROFESSOR", "ALUNO"})
+    public Response removerIntegrante(@PathParam("id") Integer id, @PathParam("integranteId") Integer integranteId) {
+        Integer usuarioId = Integer.parseInt(jwt.getSubject());
+        removerIntegranteUseCase.execute(integranteId, usuarioId);
+        return Response.noContent().build();
+    }
+
     // ==================== COMENTÁRIOS ====================
 
     @POST
     @Path("/{id}/comentarios")
-    @RolesAllowed({"PROFESSOR", "ALUNO"})
+    @RolesAllowed({"ADMIN","PROFESSOR", "ALUNO"})
     public Response adicionarComentario(@PathParam("id") Integer id, @Valid CriarComentarioRequest request) {
         Integer usuarioId = Integer.parseInt(jwt.getSubject());
         var comentario = mapper.toDomain(request);
-        var criado = gestaoProjetoUseCase.adicionarComentario(id, comentario, usuarioId);
+        var criado = adicionarComentarioUseCase.execute(id, comentario, usuarioId);
         return Response.status(Response.Status.CREATED).entity(mapper.toResponse(criado)).build();
     }
 
     @GET
     @Path("/{id}/comentarios")
     public Response listarComentarios(@PathParam("id") Integer id) {
-        List<ComentarioResponse> comentarios = gestaoProjetoUseCase.listarComentarios(id).stream()
+        List<ComentarioResponse> comentarios = listarComentariosUseCase.execute(id).stream()
                 .map(mapper::toResponse)
                 .collect(Collectors.toList());
         return Response.ok(comentarios).build();
+    }
+
+    @DELETE
+    @Path("/{id}/comentarios/{comentarioId}")
+    @RolesAllowed({"ADMIN", "PROFESSOR", "ALUNO"})
+    public Response removerComentario(@PathParam("id") Integer id, @PathParam("comentarioId") Integer comentarioId) {
+        Integer usuarioId = Integer.parseInt(jwt.getSubject());
+        removerComentarioUseCase.execute(comentarioId, usuarioId);
+        return Response.noContent().build();
     }
 
     // ==================== REGISTROS DIÁRIOS ====================
@@ -183,25 +307,39 @@ public class ProjetoResource {
         List<StorageFileInput> arquivosInput = new ArrayList<>();
         if (request.arquivos != null) {
             for (FileUpload fileUpload : request.arquivos) {
-                StorageFileInput input = extrairFileInput(fileUpload, "projects/" + projetoId + "/registros");
+                StorageFileInput input = mapper.toStorageFileInput(fileUpload, "projects/" + projetoId + "/registros");
                 if (input != null) {
                     arquivosInput.add(input);
                 }
             }
         }
 
-        var criado = gestaoProjetoUseCase.criarRegistroDiario(projetoId, registro, alunoId, arquivosInput);
-        return Response.status(Response.Status.CREATED).entity(toRegistroDiarioResponse(criado)).build();
+        var criado = criarRegistroDiarioUseCase.execute(projetoId, registro, alunoId, arquivosInput);
+        return Response.status(Response.Status.CREATED).entity(mapper.toResponse(criado)).build();
     }
 
     @GET
     @Path("/{id}/registros-diarios")
-    @RolesAllowed({"PROFESSOR", "ALUNO"})
+    @RolesAllowed({"ADMIN", "PROFESSOR", "ALUNO"})
     public Response listarRegistrosDiarios(@PathParam("id") Integer id) {
-        List<RegistroDiarioResponse> registros = gestaoProjetoUseCase.listarRegistrosDiarios(id).stream()
-                .map(this::toRegistroDiarioResponse)
+        Integer usuarioId = Integer.parseInt(jwt.getSubject());
+        List<RegistroDiarioResponse> registros = listarRegistrosDiariosUseCase.execute(id, usuarioId).stream()
+                .map(mapper::toResponse)
                 .collect(Collectors.toList());
         return Response.ok(registros).build();
+    }
+
+    @PUT
+    @Path("/{id}/registros-diarios/{registroId}")
+    @RolesAllowed("ALUNO")
+    public Response atualizarRegistroDiario(
+            @PathParam("id") Integer projetoId,
+            @PathParam("registroId") Integer registroId,
+            @Valid AtualizarRegistroDiarioRequest request) {
+        
+        Integer alunoId = Integer.parseInt(jwt.getSubject());
+        var atualizado = atualizarRegistroDiarioUseCase.execute(registroId, request.texto(), alunoId);
+        return Response.ok(mapper.toResponse(atualizado)).build();
     }
 
     @POST
@@ -211,21 +349,22 @@ public class ProjetoResource {
     public Response adicionarArquivoRegistro(
             @PathParam("id") Integer projetoId,
             @PathParam("registroId") Integer registroId,
-            @RestForm("arquivo") FileUpload arquivo) {
+            @Valid AdicionarArquivoRegistroRequest request) {
         
         Integer alunoId = Integer.parseInt(jwt.getSubject());
 
+        FileUpload arquivo = request.arquivo;
         if (arquivo == null || arquivo.uploadedFile() == null) {
             throw new BusinessRuleException("O arquivo é obrigatório.");
         }
 
-        StorageFileInput input = extrairFileInput(arquivo, "projects/" + projetoId + "/registros");
+        StorageFileInput input = mapper.toStorageFileInput(arquivo, "projects/" + projetoId + "/registros");
         if (input == null) {
             throw new BusinessRuleException("Falha ao processar o arquivo.");
         }
 
-        var atualizado = gestaoProjetoUseCase.adicionarArquivoRegistro(registroId, input, alunoId);
-        return Response.ok(toRegistroDiarioResponse(atualizado)).build();
+        var atualizado = adicionarArquivoRegistroUseCase.execute(registroId, input, alunoId);
+        return Response.ok(mapper.toResponse(atualizado)).build();
     }
 
     @DELETE
@@ -237,51 +376,7 @@ public class ProjetoResource {
             @PathParam("chave") String chave) {
         
         Integer alunoId = Integer.parseInt(jwt.getSubject());
-        var atualizado = gestaoProjetoUseCase.removerArquivoRegistro(registroId, chave, alunoId);
-        return Response.ok(toRegistroDiarioResponse(atualizado)).build();
-    }
-
-    // ==================== Helpers ====================
-
-    private RegistroDiarioResponse toRegistroDiarioResponse(RegistroDiario registro) {
-        List<RegistroDiarioArquivoResponse> arquivosResponse = registro.getArquivoChaves().stream()
-                .map(chave -> new RegistroDiarioArquivoResponse(chave, storageService.gerarUrl(chave)))
-                .collect(Collectors.toList());
-
-        return new RegistroDiarioResponse(
-                registro.getId(),
-                registro.getTexto(),
-                registro.getDataCriacao(),
-                registro.getCriadoPorId(),
-                registro.getProjetoId(),
-                arquivosResponse
-        );
-    }
-
-    private StorageFileInput extrairFileInput(FileUpload fileUpload, String prefixo) {
-        if (fileUpload == null || fileUpload.uploadedFile() == null) {
-            return null;
-        }
-
-        try {
-            byte[] conteudo = Files.readAllBytes(fileUpload.uploadedFile());
-            if (conteudo.length == 0) {
-                return null;
-            }
-
-            String mimeType = fileUpload.contentType() != null
-                    ? fileUpload.contentType()
-                    : "application/octet-stream";
-
-            return new StorageFileInput(
-                    fileUpload.fileName(),
-                    mimeType,
-                    conteudo.length,
-                    conteudo,
-                    prefixo
-            );
-        } catch (IOException e) {
-            throw new RuntimeException("Falha ao processar arquivo de upload.", e);
-        }
+        var atualizado = removerArquivoRegistroUseCase.execute(registroId, chave, alunoId);
+        return Response.ok(mapper.toResponse(atualizado)).build();
     }
 }

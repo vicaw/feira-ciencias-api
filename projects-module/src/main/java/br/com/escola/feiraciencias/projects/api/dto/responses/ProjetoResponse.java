@@ -14,5 +14,6 @@ public record ProjetoResponse(
     String areaDeConhecimento,
     String serie,
     Integer criadoPorId,
-    Integer eventoId
+    Integer eventoId,
+    String imagemCapaUrl
 ) {}

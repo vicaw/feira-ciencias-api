@@ -11,7 +11,10 @@ import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
+import software.amazon.awssdk.services.s3.model.HeadBucketRequest;
+import software.amazon.awssdk.services.s3.model.NoSuchBucketException;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 /**
@@ -43,7 +46,7 @@ public class S3StorageClient {
 
     private S3Client s3Client;
 
-    @PostConstruct
+    @PostConstruct 
     void init() {
         this.s3Client = S3Client.builder()
                 .endpointOverride(URI.create(endpoint))
@@ -53,15 +56,22 @@ public class S3StorageClient {
                 .region(Region.of(region))
                 .forcePathStyle(true)
                 .build();
+
+        // Auto-criar bucket se não existir (útil para LocalStack/MinIO em dev)
+        try {
+            s3Client.headBucket(HeadBucketRequest.builder().bucket(bucket).build());
+        } catch (NoSuchBucketException e) {
+            try {
+                s3Client.createBucket(CreateBucketRequest.builder().bucket(bucket).build());
+            } catch (Exception ex) {
+                // Silencioso em caso de falta de permissão (ex: em prod)
+            }
+        } catch (Exception e) {
+            // Ignorar erros de conexão/resolução de DNS na inicialização para evitar que o app quebre se o S3 estiver temporariamente offline
+        }
     }
 
-    /**
-     * Faz upload de um arquivo para o bucket S3.
-     *
-     * @param chave    chave (key) do objeto no bucket
-     * @param conteudo bytes do arquivo
-     * @param mimeType tipo MIME
-     */
+
     public void upload(String chave, byte[] conteudo, String mimeType) {
         PutObjectRequest request = PutObjectRequest.builder()
                 .bucket(bucket)
@@ -72,11 +82,7 @@ public class S3StorageClient {
         s3Client.putObject(request, RequestBody.fromBytes(conteudo));
     }
 
-    /**
-     * Remove um arquivo do bucket S3.
-     *
-     * @param chave chave (key) do objeto no bucket
-     */
+
     public void delete(String chave) {
         DeleteObjectRequest request = DeleteObjectRequest.builder()
                 .bucket(bucket)
@@ -86,13 +92,7 @@ public class S3StorageClient {
         s3Client.deleteObject(request);
     }
 
-    /**
-     * Gera a URL pública do arquivo.
-     * Formato: {publicUrl}/{chave}
-     *
-     * @param chave chave (key) do objeto no bucket
-     * @return URL pública
-     */
+
     public String gerarUrl(String chave) {
         String base = publicUrl.endsWith("/") ? publicUrl : publicUrl + "/";
         return base + chave;

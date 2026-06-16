@@ -1,5 +1,9 @@
 package br.com.escola.feiraciencias.projects.infrastructure.persistence.repositories;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 import br.com.escola.feiraciencias.projects.domain.model.Projeto;
 import br.com.escola.feiraciencias.projects.domain.repositories.ProjetoRepository;
 import br.com.escola.feiraciencias.projects.infrastructure.persistence.entities.ProjetoJpaEntity;
@@ -7,9 +11,6 @@ import br.com.escola.feiraciencias.projects.infrastructure.persistence.mappers.P
 import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class ProjetoPanacheRepository implements ProjetoRepository, PanacheRepositoryBase<ProjetoJpaEntity, Integer> {
@@ -20,7 +21,11 @@ public class ProjetoPanacheRepository implements ProjetoRepository, PanacheRepos
     @Override
     public Projeto salvar(Projeto projeto) {
         ProjetoJpaEntity entity = mapper.toEntity(projeto);
-        persist(entity);
+        if (entity.getId() == null) {
+            persist(entity);
+        } else {
+            entity = getEntityManager().merge(entity);
+        }
         return mapper.toDomain(entity);
     }
 

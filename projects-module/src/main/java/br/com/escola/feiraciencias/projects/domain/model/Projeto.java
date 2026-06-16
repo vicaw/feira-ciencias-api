@@ -23,4 +23,5 @@ public class Projeto {
     private String serie;
     private Integer criadoPorId;
     private Integer eventoId;
+    private String imagemCapaChave;
 }

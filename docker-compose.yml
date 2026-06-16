@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   db:
     image: postgres:15.4-alpine
@@ -18,27 +16,23 @@ services:
       timeout: 5s
       retries: 5
 
-  pgadmin:
-    image: dpage/pgadmin4:8.5
-    container_name: feira_ciencias_pgadmin
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@feira.com
-      PGADMIN_DEFAULT_PASSWORD: admin_pass
-    ports:
-      - "8081:80"
-    depends_on:
-      db:
-        condition: service_healthy
-    volumes:
-      - pgadmin_data:/var/lib/pgadmin
-
   localstack:
     container_name: localstack_s3
-    image: localstack/localstack:latest
+    image: localstack/localstack:3.4.0
     ports:
       - "4566:4566"
     environment:
       - SERVICES=s3
+      - ACTIVATE_PRO=false
+
+  adminer:
+    image: adminer
+    container_name: feira_ciencias_adminer
+    ports:
+      - "8081:8080"
+    depends_on:
+      db:
+        condition: service_healthy
 
 volumes:
   postgres_data:

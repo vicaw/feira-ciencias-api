@@ -1,17 +1,17 @@
 package br.com.escola.feiraciencias.events.infrastructure.persistence.repositories;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 import br.com.escola.feiraciencias.events.domain.model.Evento;
 import br.com.escola.feiraciencias.events.domain.repositories.EventoRepository;
 import br.com.escola.feiraciencias.events.infrastructure.persistence.entities.EventoJpaEntity;
 import br.com.escola.feiraciencias.events.infrastructure.persistence.mappers.EventoPersistenceMapper;
+import br.com.escola.feiraciencias.shared.domain.pagination.Page;
 import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import java.util.Optional;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import br.com.escola.feiraciencias.shared.domain.pagination.Page;
 
 @ApplicationScoped
 public class EventoPanacheRepository implements EventoRepository, PanacheRepositoryBase<EventoJpaEntity, Integer> {
@@ -22,7 +22,11 @@ public class EventoPanacheRepository implements EventoRepository, PanacheReposit
     @Override
     public Evento salvar(Evento evento) {
         EventoJpaEntity entity = mapper.toEntity(evento);
-        persist(entity);
+        if (entity.getId() == null) {
+            persist(entity);
+        } else {
+            entity = getEntityManager().merge(entity);
+        }
         return mapper.toDomain(entity);
     }
 
