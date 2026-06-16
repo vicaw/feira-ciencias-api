@@ -3,8 +3,6 @@ package br.com.escola.feiraciencias.projects.application.usecases;
 import br.com.escola.feiraciencias.projects.domain.model.Projeto;
 import br.com.escola.feiraciencias.projects.domain.repositories.ProjetoRepository;
 import br.com.escola.feiraciencias.projects.domain.repositories.ProjetoUsuarioRepository;
-import br.com.escola.feiraciencias.shared.domain.enums.TipoIntegrante;
-import br.com.escola.feiraciencias.shared.domain.enums.TipoUsuario;
 import br.com.escola.feiraciencias.shared.domain.exceptions.BusinessRuleException;
 import br.com.escola.feiraciencias.users.application.services.UsuarioService;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -36,7 +34,7 @@ public class AtualizarMateriaisDescricaoUseCase {
 
         if (!isCriador) {
             var vinculo = projetoUsuarioRepository.buscarPorProjetoEUsuario(id, usuarioId);
-            if (vinculo.isPresent() && vinculo.get().getTipoIntegrante() == TipoIntegrante.ALUNO) {
+            if (vinculo.isPresent()) {
                 isAlunoIntegrante = true;
             }
         }

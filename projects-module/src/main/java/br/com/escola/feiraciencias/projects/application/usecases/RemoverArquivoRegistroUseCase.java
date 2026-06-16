@@ -1,9 +1,8 @@
 package br.com.escola.feiraciencias.projects.application.usecases;
 
 import br.com.escola.feiraciencias.projects.domain.model.RegistroDiario;
-import br.com.escola.feiraciencias.projects.domain.repositories.RegistroDiarioRepository;
 import br.com.escola.feiraciencias.projects.domain.repositories.ProjetoUsuarioRepository;
-import br.com.escola.feiraciencias.shared.domain.enums.TipoIntegrante;
+import br.com.escola.feiraciencias.projects.domain.repositories.RegistroDiarioRepository;
 import br.com.escola.feiraciencias.shared.domain.exceptions.BusinessRuleException;
 import br.com.escola.feiraciencias.shared.domain.exceptions.EntityNotFoundException;
 import br.com.escola.feiraciencias.storage.application.contracts.StorageService;
@@ -33,7 +32,7 @@ public class RemoverArquivoRegistroUseCase {
         }
 
         var vinculo = projetoUsuarioRepository.buscarPorProjetoEUsuario(registro.getProjetoId(), alunoId);
-        if (vinculo.isEmpty() || vinculo.get().getTipoIntegrante() != TipoIntegrante.ALUNO) {
+        if (vinculo.isEmpty()) {
             throw new BusinessRuleException("O aluno precisa ser integrante do projeto para remover arquivos no diário.");
         }
 
