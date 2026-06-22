@@ -23,6 +23,7 @@ import br.com.escola.feiraciencias.shared.domain.exceptions.BusinessRuleExceptio
 import br.com.escola.feiraciencias.shared.domain.pagination.Page;
 import br.com.escola.feiraciencias.shared.infrastructure.api.dto.PageResponse;
 import br.com.escola.feiraciencias.storage.application.dto.StorageFileInput;
+import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
@@ -73,6 +74,7 @@ public class EventoResource {
     // ==================== LISTAGEM / DETALHE ====================
 
     @GET
+    @PermitAll
     public Response listarEventos(
             @QueryParam("page") @DefaultValue("0") int page,
             @QueryParam("size") @DefaultValue("20") int size) {
@@ -85,6 +87,7 @@ public class EventoResource {
 
     @GET
     @Path("/{id}")
+    @PermitAll
     public Response obterEvento(@PathParam("id") Integer id) {
         var evento = buscarEventoPorIdUseCase.execute(id);
         return Response.ok(mapper.toResponse(evento)).build();

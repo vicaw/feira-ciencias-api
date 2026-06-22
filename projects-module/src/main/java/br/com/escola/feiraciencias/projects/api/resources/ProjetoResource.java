@@ -43,6 +43,7 @@ import br.com.escola.feiraciencias.projects.application.usecases.RemoverIntegran
 import br.com.escola.feiraciencias.projects.domain.model.RegistroDiario;
 import br.com.escola.feiraciencias.shared.domain.exceptions.BusinessRuleException;
 import br.com.escola.feiraciencias.storage.application.dto.StorageFileInput;
+import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
@@ -148,6 +149,7 @@ public class ProjetoResource {
 
     @GET
     @Path("/{id}")
+    @PermitAll
     public Response obterProjeto(@PathParam("id") Integer id) {
         var projeto = buscarProjetoUseCase.execute(id);
         return Response.ok(mapper.toResponse(projeto)).build();
@@ -155,6 +157,7 @@ public class ProjetoResource {
 
     @GET
     @Path("/evento/{eventoId}")
+    @PermitAll
     public Response listarProjetosPorEvento(@PathParam("eventoId") Integer eventoId) {
         List<ProjetoResponse> projetos = listarProjetosUseCase.execute(eventoId).stream()
                 .map(mapper::toResponse)
@@ -247,6 +250,7 @@ public class ProjetoResource {
 
     @GET
     @Path("/{id}/integrantes")
+    @PermitAll
     public Response listarIntegrantes(@PathParam("id") Integer id) {
         List<IntegranteResponse> integrantes = listarIntegrantesUseCase.execute(id).stream()
                 .map(i -> new IntegranteResponse(i.getId(), i.getProjetoId(), i.getUsuarioId(), 
@@ -278,6 +282,7 @@ public class ProjetoResource {
 
     @GET
     @Path("/{id}/comentarios")
+    @PermitAll
     public Response listarComentarios(@PathParam("id") Integer id) {
         List<ComentarioResponse> comentarios = listarComentariosUseCase.execute(id).stream()
                 .map(mapper::toResponse)
