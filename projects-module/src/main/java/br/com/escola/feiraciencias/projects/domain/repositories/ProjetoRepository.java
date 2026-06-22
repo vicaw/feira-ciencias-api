@@ -7,5 +7,7 @@ import java.util.List;
 public interface ProjetoRepository {
     Projeto salvar(Projeto projeto);
     Optional<Projeto> buscarPorId(Integer id);
+    List<Projeto> listarTodos();
     List<Projeto> listarPorEvento(Integer eventoId);
+    void excluir(Integer id);
 }

@@ -16,12 +16,14 @@ public class RegistroDiarioArquivoJpaEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "arquivo_id", nullable = false)
-    private String arquivoId; // UUID retornado pelo storage-module
+    /**
+     * Chave (key) do arquivo no storage.
+     * Nunca armazena URL — a URL é resolvida sob demanda.
+     */
+    @Column(name = "arquivo_chave", nullable = false, length = 500)
+    private String arquivoChave;
 
-    @Column(name = "nome_original", nullable = false)
-    private String nomeOriginal; // Cópia do nome para exibição rápida
-
-    @Column(name = "registro_diario_id", nullable = false)
-    private Integer registroDiarioId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "registro_diario_id", nullable = false)
+    private RegistroDiarioJpaEntity registroDiario;
 }

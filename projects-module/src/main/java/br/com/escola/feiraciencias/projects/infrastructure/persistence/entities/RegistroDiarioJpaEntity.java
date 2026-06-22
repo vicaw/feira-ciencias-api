@@ -2,6 +2,8 @@ package br.com.escola.feiraciencias.projects.infrastructure.persistence.entities
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -28,4 +30,7 @@ public class RegistroDiarioJpaEntity {
 
     @Column(name = "projeto_id", nullable = false)
     private Integer projetoId;
+
+    @OneToMany(mappedBy = "registroDiario", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private List<RegistroDiarioArquivoJpaEntity> arquivos = new ArrayList<>();
 }

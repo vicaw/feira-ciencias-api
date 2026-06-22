@@ -1,9 +1,10 @@
 package br.com.escola.feiraciencias.users.domain.model;
 
-import br.com.escola.feiraciencias.shared.domain.enums.TipoUsuario;
-import br.com.escola.feiraciencias.shared.domain.validation.DomainValidator;
 import java.time.LocalDateTime;
 
+import br.com.escola.feiraciencias.shared.domain.enums.TipoUsuario;
+import br.com.escola.feiraciencias.shared.domain.exceptions.BusinessRuleException;
+import br.com.escola.feiraciencias.shared.domain.validation.DomainValidator;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -49,11 +50,50 @@ public abstract class Usuario {
         this.tipoUsuario = tipoUsuario;
     }
 
-     public boolean isProfessor() {
-        return TipoUsuario.PROFESSOR.equals(tipoUsuario);
+        public boolean isAdmin() {
+        return TipoUsuario.ADMIN.equals(tipoUsuario);
+    }
+
+    public boolean isProfessor() {
+        return TipoUsuario.PROFESSOR.equals(tipoUsuario) || TipoUsuario.ADMIN.equals(tipoUsuario);
     }
  
     public boolean isAluno() {
         return TipoUsuario.ALUNO.equals(tipoUsuario);
+    }
+
+    /**
+     * Atualiza nome e/ou email do usuario.
+     * Nome pode ser null -- nesse caso nao e alterado.
+     */
+    public void atualizarContato(String nome, String email) {
+        if (nome != null) {
+            DomainValidator.notBlank(nome, "O nome nao pode ser vazio.");
+            this.nome = nome;
+        }
+        if (email != null) {
+            DomainValidator.validEmail(email, "O email informado e invalido.");
+            this.email = email;
+        }
+    }
+
+    /**
+     * Troca a senha do proprio usuario, exigindo confirmacao da senha atual.
+     */
+    public void alterarSenha(String senhaAtualHash, String novaSenhaHash) {
+        if (!this.senha.equals(senhaAtualHash)) {
+            throw new BusinessRuleException("Senha atual incorreta.");
+        }
+        DomainValidator.notBlank(novaSenhaHash, "A nova senha nao pode ser vazia.");
+        this.senha = novaSenhaHash;
+    }
+
+    /**
+     * Reseta a senha do usuario sem exigir a senha atual.
+     * Uso exclusivo por PROFESSOR (aluno vinculado) ou ADMIN.
+     */
+    public void resetarSenha(String novaSenhaHash) {
+        DomainValidator.notBlank(novaSenhaHash, "A nova senha nao pode ser vazia.");
+        this.senha = novaSenhaHash;
     }
 }

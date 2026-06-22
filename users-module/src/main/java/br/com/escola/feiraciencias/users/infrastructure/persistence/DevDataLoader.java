@@ -1,5 +1,9 @@
 package br.com.escola.feiraciencias.users.infrastructure.persistence;
 
+import java.time.LocalDateTime;
+
+import org.jboss.logging.Logger;
+
 import br.com.escola.feiraciencias.shared.domain.enums.TipoUsuario;
 import br.com.escola.feiraciencias.users.domain.model.Professor;
 import br.com.escola.feiraciencias.users.domain.repositories.UsuarioRepository;
@@ -10,9 +14,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
-import org.jboss.logging.Logger;
-
-import java.time.LocalDateTime;
 
 @ApplicationScoped
 @IfBuildProfile("dev")
@@ -39,7 +40,7 @@ public class DevDataLoader {
                     .nome("Professor Global")
                     .email(email)
                     .senha(senhaHasheada)
-                    .tipoUsuario(TipoUsuario.PROFESSOR)
+                    .tipoUsuario(TipoUsuario.ADMIN)
                     .dataCadastro(LocalDateTime.now())
                     .isAdm(true)
                     .materia("Ciências Naturais")

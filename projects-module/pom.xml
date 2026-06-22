@@ -26,8 +26,17 @@
         </dependency>
 
         <dependency>
+            <groupId>br.com.escola.feiraciencias</groupId>
+            <artifactId>storage-module</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-resteasy-reactive-jackson</artifactId>
+            <artifactId>quarkus-rest-jackson</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-smallrye-openapi</artifactId>
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
