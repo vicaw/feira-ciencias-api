@@ -30,6 +30,25 @@ Códigos de erro mapeados globalmente:
 - Rotas com `@RolesAllowed` exigem `Authorization: Bearer <token>`.
 - Rotas com `@PermitAll` são públicas.
 
+## Enum obrigatório para série (`anoEscolar`)
+
+Nas rotas que recebem o campo `anoEscolar`, o valor deve ser enviado como **ENUM** (não texto livre como "3º Ano").
+
+Valores aceitos:
+
+- `EF_1`
+- `EF_2`
+- `EF_3`
+- `EF_4`
+- `EF_5`
+- `EF_6`
+- `EF_7`
+- `EF_8`
+- `EF_9`
+- `EM_1`
+- `EM_2`
+- `EM_3`
+
 ---
 
 ## Auth
@@ -202,6 +221,16 @@ Erro `404`:
 ```
 
 #### PATCH /usuarios/{id}
+Exemplo de request (quando `tipo=ALUNO`):
+```json
+{
+  "nome": "Lucas Lima Atualizado",
+  "email": "lucas.novo@escola.com",
+  "matricula": "2024001",
+  "anoEscolar": "EM_1"
+}
+```
+
 Sucesso `200 OK`:
 ```json
 {
@@ -323,6 +352,15 @@ Erro `404`:
 ```
 
 #### POST /convites/alunos
+Exemplo de request:
+```json
+{
+  "nome": "Marina Alves",
+  "matricula": "2024001",
+  "anoEscolar": "EM_1"
+}
+```
+
 Sucesso `201 Created`:
 ```json
 {
