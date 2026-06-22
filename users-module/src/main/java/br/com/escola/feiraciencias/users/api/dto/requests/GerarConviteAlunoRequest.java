@@ -1,6 +1,8 @@
 package br.com.escola.feiraciencias.users.api.dto.requests;
 
+import br.com.escola.feiraciencias.users.domain.enums.AnoEscolar;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 public record GerarConviteAlunoRequest(
@@ -11,6 +13,6 @@ public record GerarConviteAlunoRequest(
     @NotBlank(message = "A matrícula é obrigatória.")
     String matricula,
 
-    @NotBlank(message = "O ano escolar é obrigatório.")
-    String anoEscolar
+    @NotNull(message = "O ano escolar é obrigatório.")
+    AnoEscolar anoEscolar
 ) {}

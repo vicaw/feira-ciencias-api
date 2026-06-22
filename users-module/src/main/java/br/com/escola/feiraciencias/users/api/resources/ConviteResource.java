@@ -5,7 +5,6 @@ import java.util.Map;
 
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
-import br.com.escola.feiraciencias.shared.domain.enums.TipoUsuario;
 import br.com.escola.feiraciencias.shared.domain.pagination.Page;
 import br.com.escola.feiraciencias.shared.infrastructure.api.dto.PageResponse;
 import br.com.escola.feiraciencias.users.api.dto.requests.GerarConviteAlunoRequest;
@@ -77,7 +76,7 @@ public class ConviteResource {
 
     @POST
     @Path("/alunos")
-    @RolesAllowed("PROFESSOR")
+    @RolesAllowed({"PROFESSOR", "ADMIN"})
     public Response gerarConviteAluno(@Valid GerarConviteAlunoRequest request) {
         Integer professorId = Integer.parseInt(jwt.getSubject());
         String token = gerarConviteAlunoUseCase.execute(

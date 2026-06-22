@@ -1,7 +1,5 @@
 package br.com.escola.feiraciencias.events.application.usecases;
 
-import java.util.List;
-
 import br.com.escola.feiraciencias.events.domain.model.Evento;
 import br.com.escola.feiraciencias.events.domain.repositories.EventoRepository;
 import br.com.escola.feiraciencias.shared.domain.pagination.Page;

@@ -28,13 +28,13 @@ public class ConviteRegistro {
     private StatusConvite status;
 
     public static ConviteRegistro criarParaAluno(String nome, String matricula, 
-                                              String anoEscolar, Integer criadoPorId) {
+                                              br.com.escola.feiraciencias.users.domain.enums.AnoEscolar anoEscolar, Integer criadoPorId) {
         return ConviteRegistro.builder()
             .token(UUID.randomUUID().toString())
             .nome(nome)
             .matricula(matricula)
             .tipoUsuario(TipoUsuario.ALUNO)
-            .vinculo(anoEscolar)
+            .vinculo(anoEscolar.name())
             .criadoPorId(criadoPorId)
             .dataCriacao(LocalDateTime.now())
             .dataExpiracao(LocalDateTime.now().plusDays(7))
@@ -64,7 +64,7 @@ public class ConviteRegistro {
                         .email(email)
                         .tipoUsuario(TipoUsuario.ALUNO)
                         .matricula(matricula)
-                        .anoEscolar(vinculo)
+                        .anoEscolar(br.com.escola.feiraciencias.users.domain.enums.AnoEscolar.valueOf(vinculo))
                         .build();
                 aluno.vincularAoProfessor(criadoPorId);
                 yield aluno;

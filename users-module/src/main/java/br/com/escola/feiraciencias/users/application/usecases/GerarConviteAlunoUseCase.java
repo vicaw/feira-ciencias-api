@@ -2,6 +2,7 @@ package br.com.escola.feiraciencias.users.application.usecases;
 
 import br.com.escola.feiraciencias.shared.domain.exceptions.BusinessRuleException;
 import br.com.escola.feiraciencias.users.application.services.UsuarioService;
+import br.com.escola.feiraciencias.users.domain.enums.AnoEscolar;
 import br.com.escola.feiraciencias.users.domain.model.ConviteRegistro;
 import br.com.escola.feiraciencias.users.domain.model.Usuario;
 import br.com.escola.feiraciencias.users.domain.repositories.ConviteRegistroRepository;
@@ -19,7 +20,7 @@ public class GerarConviteAlunoUseCase {
     ConviteRegistroRepository conviteRepository;
 
     @Transactional
-    public String execute(String nome, String matricula, String anoEscolar, Integer solicitanteId) {
+    public String execute(String nome, String matricula, AnoEscolar anoEscolar, Integer solicitanteId) {
         Usuario orientador = usuarioService.buscarPorIdOuFalhar(solicitanteId);
 
         if (!orientador.isProfessor()) {

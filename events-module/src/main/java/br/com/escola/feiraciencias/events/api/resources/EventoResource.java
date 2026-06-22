@@ -1,11 +1,9 @@
 package br.com.escola.feiraciencias.events.api.resources;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.eclipse.microprofile.jwt.JsonWebToken;
-import org.jboss.resteasy.reactive.RestForm;
 import org.jboss.resteasy.reactive.multipart.FileUpload;
 
 import br.com.escola.feiraciencias.events.api.dto.requests.AtualizarCapaEventoRequest;
@@ -13,9 +11,6 @@ import br.com.escola.feiraciencias.events.api.dto.requests.AtualizarEventoReques
 import br.com.escola.feiraciencias.events.api.dto.requests.CriarEventoRequest;
 import br.com.escola.feiraciencias.events.api.dto.responses.EventoResponse;
 import br.com.escola.feiraciencias.events.api.mappers.EventoApiMapper;
-import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
-import org.eclipse.microprofile.openapi.annotations.media.Schema;
-import org.jboss.resteasy.reactive.PartType;
 import br.com.escola.feiraciencias.events.application.usecases.CriarEventoUseCase;
 import br.com.escola.feiraciencias.events.application.usecases.BuscarEventoPorIdUseCase;
 import br.com.escola.feiraciencias.events.application.usecases.ListarEventosUseCase;

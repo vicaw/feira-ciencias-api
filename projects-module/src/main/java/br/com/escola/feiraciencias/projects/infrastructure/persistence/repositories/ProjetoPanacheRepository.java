@@ -35,6 +35,11 @@ public class ProjetoPanacheRepository implements ProjetoRepository, PanacheRepos
     }
 
     @Override
+    public List<Projeto> listarTodos() {
+        return listAll().stream().map(mapper::toDomain).collect(Collectors.toList());
+    }
+
+    @Override
     public List<Projeto> listarPorEvento(Integer eventoId) {
         return list("eventoId", eventoId).stream().map(mapper::toDomain).collect(Collectors.toList());
     }

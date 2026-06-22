@@ -3,6 +3,7 @@ package br.com.escola.feiraciencias.users.application.usecases;
 import br.com.escola.feiraciencias.shared.domain.enums.TipoUsuario;
 import br.com.escola.feiraciencias.shared.domain.exceptions.BusinessRuleException;
 import br.com.escola.feiraciencias.users.application.services.UsuarioService;
+import br.com.escola.feiraciencias.users.domain.enums.AnoEscolar;
 import br.com.escola.feiraciencias.users.domain.model.Aluno;
 import br.com.escola.feiraciencias.users.domain.model.Usuario;
 import br.com.escola.feiraciencias.users.domain.repositories.UsuarioRepository;
@@ -21,7 +22,7 @@ public class AtualizarUsuarioUseCase {
 
     @Transactional
     public Usuario execute(Integer solicitanteId, Integer targetId,
-                           String nome, String email, String matricula, String anoEscolar, String materia) {
+                           String nome, String email, String matricula, AnoEscolar anoEscolar, String materia) {
 
         Usuario solicitante = usuarioService.buscarPorIdOuFalhar(solicitanteId);
         Usuario target = usuarioService.buscarPorIdOuFalhar(targetId);

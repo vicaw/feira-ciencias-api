@@ -241,7 +241,7 @@ Requer role: `ADMIN` ou `PROFESSOR`.
 ```
 POST /convites/alunos
 ```
-Requer role: `PROFESSOR`.
+Requer role: `PROFESSOR` ou `ADMIN`.
  
 **Body:**
 ```json
@@ -314,6 +314,28 @@ Requer role: `ADMIN` ou `PROFESSOR`.
 2. Sistema envia token  →  usuário recebe link de ativação
 3. Usuário aceita o convite       →  POST /usuarios com token + email + senha
 ```
+
+---
+
+### Projetos `/projetos`
+
+#### Listar todos os projetos
+```
+GET /projetos
+```
+Requer role: `ADMIN` ou `PROFESSOR`.
+
+Retorna todos os projetos cadastrados.
+
+---
+
+#### Listar projetos por evento
+```
+GET /projetos/evento/{eventoId}
+```
+Público.
+
+Retorna todos os projetos vinculados ao evento informado.
 
 ---
 

@@ -1,6 +1,5 @@
 package br.com.escola.feiraciencias.projects.api.dto.requests;
 
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 public record AtualizarProjetoMateriaisDescricaoRequest(

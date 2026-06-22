@@ -1,6 +1,5 @@
 package br.com.escola.feiraciencias.users.application.usecases;
 
-import br.com.escola.feiraciencias.shared.domain.enums.TipoUsuario;
 import br.com.escola.feiraciencias.shared.domain.exceptions.BusinessRuleException;
 import br.com.escola.feiraciencias.users.application.services.UsuarioService;
 import br.com.escola.feiraciencias.users.domain.model.Usuario;

@@ -16,6 +16,10 @@ public class ListarProjetosUseCase {
     @Inject
     br.com.escola.feiraciencias.events.application.services.EventoService eventoService;
 
+    public List<Projeto> execute() {
+        return projetoRepository.listarTodos();
+    }
+
     public List<Projeto> execute(Integer eventoId) {
         // Verifica se o evento existe, lançando EntityNotFoundException caso contrário
         eventoService.buscarPorIdOuFalhar(eventoId);

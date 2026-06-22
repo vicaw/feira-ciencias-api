@@ -34,6 +34,32 @@ services:
       db:
         condition: service_healthy
 
+  app-dev:
+    image: maven:3.9.9-eclipse-temurin-21
+    container_name: feira_ciencias_app_dev
+    working_dir: /workspace
+    volumes:
+      - ./:/workspace
+      - maven_cache:/root/.m2
+    ports:
+      - "8080:8080"
+      - "5005:5005"
+    environment:
+      - QUARKUS_PROFILE=dev
+      - QUARKUS_DATASOURCE_JDBC_URL=jdbc:postgresql://db:5432/feira_ciencias
+      - QUARKUS_DATASOURCE_USERNAME=feira_user
+      - QUARKUS_DATASOURCE_PASSWORD=feira_pass
+      - STORAGE_S3_ENDPOINT=http://localstack:4566
+      - QUARKUS_HTTP_HOST=0.0.0.0
+      - QUARKUS_ANALYTICS_DISABLED=true
+    depends_on:
+      db:
+        condition: service_healthy
+      localstack:
+        condition: service_started
+    command: ["bash", "-lc", "mvn -pl bootstrap -am quarkus:dev -DdebugHost=0.0.0.0"]
+
 volumes:
   postgres_data:
   pgadmin_data:
+  maven_cache:

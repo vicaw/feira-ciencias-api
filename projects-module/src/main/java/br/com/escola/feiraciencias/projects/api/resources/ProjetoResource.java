@@ -5,10 +5,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.eclipse.microprofile.jwt.JsonWebToken;
-import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
-import org.eclipse.microprofile.openapi.annotations.media.Schema;
-import org.jboss.resteasy.reactive.PartType;
-import org.jboss.resteasy.reactive.RestForm;
 import org.jboss.resteasy.reactive.multipart.FileUpload;
 
 import br.com.escola.feiraciencias.projects.api.dto.requests.AdicionarIntegranteRequest;
@@ -139,6 +135,15 @@ public class ProjetoResource {
         var projeto = mapper.toDomain(request);
         var criado = criarProjetoUseCase.execute(projeto, professorId);
         return Response.status(Response.Status.CREATED).entity(mapper.toResponse(criado)).build();
+    }
+
+    @GET
+    @RolesAllowed({"ADMIN","PROFESSOR"})
+    public Response listarProjetos() {
+        List<ProjetoResponse> projetos = listarProjetosUseCase.execute().stream()
+                .map(mapper::toResponse)
+                .collect(Collectors.toList());
+        return Response.ok(projetos).build();
     }
 
     @GET

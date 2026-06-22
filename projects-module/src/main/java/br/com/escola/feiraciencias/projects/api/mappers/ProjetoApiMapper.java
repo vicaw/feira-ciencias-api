@@ -36,6 +36,7 @@ public abstract class ProjetoApiMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "dataCriacao", ignore = true)
     @Mapping(target = "criadoPorId", ignore = true)
+    @Mapping(target = "eventoId", ignore = true)
     @Mapping(target = "imagemCapaChave", ignore = true)
     public abstract Projeto toDomain(AtualizarProjetoRequest dto);
 
@@ -67,6 +68,8 @@ public abstract class ProjetoApiMapper {
         );
     }
     
+    @Mapping(target = "usuarioId", source = "criadoPorId")
+    @Mapping(target = "dataCriacao", source = "dataComentario")
     public abstract ComentarioResponse toResponse(Comentario domain);
 
     @Mapping(target = "arquivos", source = "arquivoChaves")
